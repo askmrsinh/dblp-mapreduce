@@ -1,0 +1,593 @@
+<schema
+  xmlns='http://www.w3.org/2000/10/XMLSchema'
+  targetNamespace='http://www.w3.org/namespace/'
+  xmlns:t='http://www.w3.org/namespace/'>
+
+ <element name='dblp'>
+  <complexType>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:article'/>
+    <element ref='t:inproceedings'/>
+    <element ref='t:proceedings'/>
+    <element ref='t:book'/>
+    <element ref='t:incollection'/>
+    <element ref='t:phdthesis'/>
+    <element ref='t:mastersthesis'/>
+    <element ref='t:www'/>
+    <element ref='t:person'/>
+    <element ref='t:data'/>
+   </choice>
+   <attribute name='mdate' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='article'>
+  <complexType>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:author'/>
+    <element ref='t:editor'/>
+    <element ref='t:title'/>
+    <element ref='t:booktitle'/>
+    <element ref='t:pages'/>
+    <element ref='t:year'/>
+    <element ref='t:address'/>
+    <element ref='t:journal'/>
+    <element ref='t:volume'/>
+    <element ref='t:number'/>
+    <element ref='t:month'/>
+    <element ref='t:url'/>
+    <element ref='t:ee'/>
+    <element ref='t:cdrom'/>
+    <element ref='t:cite'/>
+    <element ref='t:publisher'/>
+    <element ref='t:note'/>
+    <element ref='t:crossref'/>
+    <element ref='t:isbn'/>
+    <element ref='t:series'/>
+    <element ref='t:school'/>
+    <element ref='t:chapter'/>
+    <element ref='t:publnr'/>
+   </choice>
+   <attribute name='key' type='string' use='required'/>
+   <attribute name='mdate' type='string' use='optional'/>
+   <attribute name='publtype' type='string' use='optional'/>
+   <attribute name='reviewid' type='string' use='optional'/>
+   <attribute name='rating' type='string' use='optional'/>
+   <attribute name='cdate' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='inproceedings'>
+  <complexType>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:author'/>
+    <element ref='t:editor'/>
+    <element ref='t:title'/>
+    <element ref='t:booktitle'/>
+    <element ref='t:pages'/>
+    <element ref='t:year'/>
+    <element ref='t:address'/>
+    <element ref='t:journal'/>
+    <element ref='t:volume'/>
+    <element ref='t:number'/>
+    <element ref='t:month'/>
+    <element ref='t:url'/>
+    <element ref='t:ee'/>
+    <element ref='t:cdrom'/>
+    <element ref='t:cite'/>
+    <element ref='t:publisher'/>
+    <element ref='t:note'/>
+    <element ref='t:crossref'/>
+    <element ref='t:isbn'/>
+    <element ref='t:series'/>
+    <element ref='t:school'/>
+    <element ref='t:chapter'/>
+    <element ref='t:publnr'/>
+   </choice>
+   <attribute name='key' type='string' use='required'/>
+   <attribute name='mdate' type='string' use='optional'/>
+   <attribute name='publtype' type='string' use='optional'/>
+   <attribute name='cdate' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='proceedings'>
+  <complexType>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:author'/>
+    <element ref='t:editor'/>
+    <element ref='t:title'/>
+    <element ref='t:booktitle'/>
+    <element ref='t:pages'/>
+    <element ref='t:year'/>
+    <element ref='t:address'/>
+    <element ref='t:journal'/>
+    <element ref='t:volume'/>
+    <element ref='t:number'/>
+    <element ref='t:month'/>
+    <element ref='t:url'/>
+    <element ref='t:ee'/>
+    <element ref='t:cdrom'/>
+    <element ref='t:cite'/>
+    <element ref='t:publisher'/>
+    <element ref='t:note'/>
+    <element ref='t:crossref'/>
+    <element ref='t:isbn'/>
+    <element ref='t:series'/>
+    <element ref='t:school'/>
+    <element ref='t:chapter'/>
+    <element ref='t:publnr'/>
+   </choice>
+   <attribute name='key' type='string' use='required'/>
+   <attribute name='mdate' type='string' use='optional'/>
+   <attribute name='publtype' type='string' use='optional'/>
+   <attribute name='cdate' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='book'>
+  <complexType>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:author'/>
+    <element ref='t:editor'/>
+    <element ref='t:title'/>
+    <element ref='t:booktitle'/>
+    <element ref='t:pages'/>
+    <element ref='t:year'/>
+    <element ref='t:address'/>
+    <element ref='t:journal'/>
+    <element ref='t:volume'/>
+    <element ref='t:number'/>
+    <element ref='t:month'/>
+    <element ref='t:url'/>
+    <element ref='t:ee'/>
+    <element ref='t:cdrom'/>
+    <element ref='t:cite'/>
+    <element ref='t:publisher'/>
+    <element ref='t:note'/>
+    <element ref='t:crossref'/>
+    <element ref='t:isbn'/>
+    <element ref='t:series'/>
+    <element ref='t:school'/>
+    <element ref='t:chapter'/>
+    <element ref='t:publnr'/>
+   </choice>
+   <attribute name='key' type='string' use='required'/>
+   <attribute name='mdate' type='string' use='optional'/>
+   <attribute name='publtype' type='string' use='optional'/>
+   <attribute name='cdate' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='incollection'>
+  <complexType>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:author'/>
+    <element ref='t:editor'/>
+    <element ref='t:title'/>
+    <element ref='t:booktitle'/>
+    <element ref='t:pages'/>
+    <element ref='t:year'/>
+    <element ref='t:address'/>
+    <element ref='t:journal'/>
+    <element ref='t:volume'/>
+    <element ref='t:number'/>
+    <element ref='t:month'/>
+    <element ref='t:url'/>
+    <element ref='t:ee'/>
+    <element ref='t:cdrom'/>
+    <element ref='t:cite'/>
+    <element ref='t:publisher'/>
+    <element ref='t:note'/>
+    <element ref='t:crossref'/>
+    <element ref='t:isbn'/>
+    <element ref='t:series'/>
+    <element ref='t:school'/>
+    <element ref='t:chapter'/>
+    <element ref='t:publnr'/>
+   </choice>
+   <attribute name='key' type='string' use='required'/>
+   <attribute name='mdate' type='string' use='optional'/>
+   <attribute name='publtype' type='string' use='optional'/>
+   <attribute name='cdate' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='phdthesis'>
+  <complexType>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:author'/>
+    <element ref='t:editor'/>
+    <element ref='t:title'/>
+    <element ref='t:booktitle'/>
+    <element ref='t:pages'/>
+    <element ref='t:year'/>
+    <element ref='t:address'/>
+    <element ref='t:journal'/>
+    <element ref='t:volume'/>
+    <element ref='t:number'/>
+    <element ref='t:month'/>
+    <element ref='t:url'/>
+    <element ref='t:ee'/>
+    <element ref='t:cdrom'/>
+    <element ref='t:cite'/>
+    <element ref='t:publisher'/>
+    <element ref='t:note'/>
+    <element ref='t:crossref'/>
+    <element ref='t:isbn'/>
+    <element ref='t:series'/>
+    <element ref='t:school'/>
+    <element ref='t:chapter'/>
+    <element ref='t:publnr'/>
+   </choice>
+   <attribute name='key' type='string' use='required'/>
+   <attribute name='mdate' type='string' use='optional'/>
+   <attribute name='publtype' type='string' use='optional'/>
+   <attribute name='cdate' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='mastersthesis'>
+  <complexType>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:author'/>
+    <element ref='t:editor'/>
+    <element ref='t:title'/>
+    <element ref='t:booktitle'/>
+    <element ref='t:pages'/>
+    <element ref='t:year'/>
+    <element ref='t:address'/>
+    <element ref='t:journal'/>
+    <element ref='t:volume'/>
+    <element ref='t:number'/>
+    <element ref='t:month'/>
+    <element ref='t:url'/>
+    <element ref='t:ee'/>
+    <element ref='t:cdrom'/>
+    <element ref='t:cite'/>
+    <element ref='t:publisher'/>
+    <element ref='t:note'/>
+    <element ref='t:crossref'/>
+    <element ref='t:isbn'/>
+    <element ref='t:series'/>
+    <element ref='t:school'/>
+    <element ref='t:chapter'/>
+    <element ref='t:publnr'/>
+   </choice>
+   <attribute name='key' type='string' use='required'/>
+   <attribute name='mdate' type='string' use='optional'/>
+   <attribute name='publtype' type='string' use='optional'/>
+   <attribute name='cdate' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='www'>
+  <complexType>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:author'/>
+    <element ref='t:editor'/>
+    <element ref='t:title'/>
+    <element ref='t:booktitle'/>
+    <element ref='t:pages'/>
+    <element ref='t:year'/>
+    <element ref='t:address'/>
+    <element ref='t:journal'/>
+    <element ref='t:volume'/>
+    <element ref='t:number'/>
+    <element ref='t:month'/>
+    <element ref='t:url'/>
+    <element ref='t:ee'/>
+    <element ref='t:cdrom'/>
+    <element ref='t:cite'/>
+    <element ref='t:publisher'/>
+    <element ref='t:note'/>
+    <element ref='t:crossref'/>
+    <element ref='t:isbn'/>
+    <element ref='t:series'/>
+    <element ref='t:school'/>
+    <element ref='t:chapter'/>
+    <element ref='t:publnr'/>
+   </choice>
+   <attribute name='key' type='string' use='required'/>
+   <attribute name='mdate' type='string' use='optional'/>
+   <attribute name='publtype' type='string' use='optional'/>
+   <attribute name='cdate' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='data'>
+  <complexType>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:author'/>
+    <element ref='t:editor'/>
+    <element ref='t:title'/>
+    <element ref='t:booktitle'/>
+    <element ref='t:pages'/>
+    <element ref='t:year'/>
+    <element ref='t:address'/>
+    <element ref='t:journal'/>
+    <element ref='t:volume'/>
+    <element ref='t:number'/>
+    <element ref='t:month'/>
+    <element ref='t:url'/>
+    <element ref='t:ee'/>
+    <element ref='t:cdrom'/>
+    <element ref='t:cite'/>
+    <element ref='t:publisher'/>
+    <element ref='t:note'/>
+    <element ref='t:crossref'/>
+    <element ref='t:isbn'/>
+    <element ref='t:series'/>
+    <element ref='t:school'/>
+    <element ref='t:chapter'/>
+    <element ref='t:publnr'/>
+   </choice>
+   <attribute name='key' type='string' use='required'/>
+   <attribute name='mdate' type='string' use='optional'/>
+   <attribute name='publtype' type='string' use='optional'/>
+   <attribute name='cdate' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='person'>
+  <complexType>
+   <choice>
+    <sequence>
+     <element ref='t:author' minOccurs='0' maxOccurs='unbounded'/>
+     <choice minOccurs='0' maxOccurs='unbounded'>
+      <element ref='t:note'/>
+      <element ref='t:url'/>
+      <element ref='t:cite'/>
+     </choice>
+    </sequence>
+    <element ref='t:crossref'/>
+   </choice>
+   <attribute name='key' type='string' use='required'/>
+   <attribute name='mdate' type='string' use='optional'/>
+   <attribute name='cdate' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='author'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='bibtex' type='string' use='optional'/>
+   <attribute name='orcid' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='editor'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='orcid' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='address'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='title'>
+  <complexType mixed='true'>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:sub'/>
+    <element ref='t:sup'/>
+    <element ref='t:i'/>
+    <element ref='t:tt'/>
+    <element ref='t:ref'/>
+   </choice>
+   <attribute name='bibtex' type='string' use='optional'/>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='booktitle'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='pages'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='year'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='journal'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='volume'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='number'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='month'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='url'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='ee'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='cite'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+   <attribute name='ref' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='school'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='publisher'>
+  <complexType mixed='true'>
+   <attribute name='href' type='string' use='optional'/>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='note'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='cdrom'>
+  <complexType mixed='true'>
+  </complexType>
+ </element>
+
+ <element name='crossref'>
+  <complexType mixed='true'>
+  </complexType>
+ </element>
+
+ <element name='isbn'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='chapter'>
+  <complexType mixed='true'>
+  </complexType>
+ </element>
+
+ <element name='series'>
+  <complexType mixed='true'>
+   <attribute name='href' type='string' use='optional'/>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='publnr'>
+  <complexType mixed='true'>
+   <attribute name='aux' type='string' use='optional'/>
+   <attribute name='label' type='string' use='optional'/>
+   <attribute name='type' type='string' use='optional'/>
+  </complexType>
+ </element>
+
+ <element name='ref'>
+  <complexType mixed='true'>
+   <attribute name='href' type='string' use='required'/>
+  </complexType>
+ </element>
+
+ <element name='sup'>
+  <complexType mixed='true'>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:sub'/>
+    <element ref='t:sup'/>
+    <element ref='t:i'/>
+    <element ref='t:tt'/>
+    <element ref='t:ref'/>
+   </choice>
+  </complexType>
+ </element>
+
+ <element name='sub'>
+  <complexType mixed='true'>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:sub'/>
+    <element ref='t:sup'/>
+    <element ref='t:i'/>
+    <element ref='t:tt'/>
+    <element ref='t:ref'/>
+   </choice>
+  </complexType>
+ </element>
+
+ <element name='i'>
+  <complexType mixed='true'>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:sub'/>
+    <element ref='t:sup'/>
+    <element ref='t:i'/>
+    <element ref='t:tt'/>
+    <element ref='t:ref'/>
+   </choice>
+  </complexType>
+ </element>
+
+ <element name='tt'>
+  <complexType mixed='true'>
+   <choice minOccurs='0' maxOccurs='unbounded'>
+    <element ref='t:sub'/>
+    <element ref='t:sup'/>
+    <element ref='t:i'/>
+    <element ref='t:tt'/>
+    <element ref='t:ref'/>
+   </choice>
+  </complexType>
+ </element>
+</schema>
