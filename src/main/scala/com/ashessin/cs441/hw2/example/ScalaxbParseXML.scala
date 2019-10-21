@@ -1,8 +1,8 @@
 package com.ashessin.cs441.hw2.example
 
-import com.ashessin.cs441.hw2.{Article, Book}
+import com.ashessin.cs441.hw2.{Article, Book, Dblp}
 
-object ParseXML {
+object ScalaxbParseXML {
   def main(args: Array[String]): Unit = {
     val test = <dblp xmlns="http://www.w3.org/namespace/">
       <article mdate="2018-01-07" key="tr/meltdown/s18" publtype="informal">
@@ -45,7 +45,7 @@ object ParseXML {
         <isbn>978-1-4503-2309-3</isbn>
       </book>
     </dblp>
-    val obj = scalaxb.fromXML[com.ashessin.cs441.hw2.Dblp](test)
+    val obj = scalaxb.fromXML[Dblp](test)
     for (dblpoption <- obj.dblpoption) {
       println(dblpoption.key)
       println(dblpoption.namespace)
