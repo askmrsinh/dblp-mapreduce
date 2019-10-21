@@ -60,7 +60,7 @@ public class Publication {
 
     @Override
     public String toString() {
-        return "key=\"" + key + "\", publrecord=\"" + publrecord + "\" mdate=\"" + mdate + "\", publtype=\"" + publtype
+        return "key=\"" + key + "\", publrecord=\"" + publrecord + "\" mdate=" + mdate + ", publtype=\"" + publtype
                 + "\" authors=" + this.authors;
     }
 }
