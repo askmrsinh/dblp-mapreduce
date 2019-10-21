@@ -1,7 +1,5 @@
 package com.ashessin.cs441.hw2.dblp;
 
-import com.ctc.wstx.api.WstxInputProperties;
-
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -21,6 +19,7 @@ public class StaxXMLReader {
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
         String fileName = args[0];
+        System.setProperty("entityExpansionLimit", "9000000");
         List<Publication> pubList = parseXML(fileName);
         System.out.println("Publications processed: " + pubList.size());
         System.out.println(pubList.get(0).toString());
@@ -42,7 +41,6 @@ public class StaxXMLReader {
         Publication pub = null;
 
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-        xmlInputFactory.setProperty(WstxInputProperties.P_MAX_ENTITY_COUNT, Integer.MAX_VALUE);
 
         try {
             XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(new FileInputStream(fileName));
