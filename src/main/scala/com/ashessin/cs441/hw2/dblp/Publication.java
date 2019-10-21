@@ -1,27 +1,19 @@
 package com.ashessin.cs441.hw2.dblp;
 
 import javax.annotation.Nullable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 public class Publication {
-    private static final String DATE_FORMAT = "yyyy-MM-dd";
-    private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT);
-
     private String key;
-    private Date mdate;
-    private Date cdate;
+    private int mdate;
     private String publtype;
     private String publrecord;
     private List<String> authors;
 
-    Publication(String key, @Nullable String mdate, @Nullable String cdate, @Nullable String publtype, String publrecord, @Nullable List<String> authors, @Nullable String title) throws ParseException {
+    Publication(String key, @Nullable int mdate, @Nullable String publtype, String publrecord, @Nullable List<String> authors) {
         this.key = key;
-        setMdate(mdate);
-        setCdate(cdate);
-        setPubltype(publtype);
+        this.mdate = mdate;
+        this.publtype = publtype;
         this.publrecord = publrecord;
         this.authors = authors;
     }
@@ -34,26 +26,12 @@ public class Publication {
         this.key = key;
     }
 
-    public Date getMdate() {
+    public int getMdate() {
         return mdate;
     }
 
-    private void setMdate(String mdate) throws ParseException {
-        if (mdate != null && !mdate.equals(""))
-            this.mdate = simpleDateFormat.parse(mdate);
-        else
-            this.mdate = null;
-    }
-
-    public Date getCdate() {
-        return cdate;
-    }
-
-    private void setCdate(String cdate) throws ParseException {
-        if (cdate != null && !cdate.equals(""))
-            this.cdate = simpleDateFormat.parse(cdate);
-        else
-            this.cdate = null;
+    private void setMdate(int mdate) {
+        this.mdate = mdate;
     }
 
     public String getPubltype() {
@@ -61,10 +39,7 @@ public class Publication {
     }
 
     private void setPubltype(String publtype) {
-        if (publtype != null && !publtype.equals(""))
-            this.publtype = publtype;
-        else
-            this.publtype = null;
+        this.publtype = publtype;
     }
 
     public String getPublrecord() {
@@ -85,7 +60,7 @@ public class Publication {
 
     @Override
     public String toString() {
-        return "key=\"" + key + "\", publrecord=\"" + publrecord + "\" mdate=\"" + mdate + "\", cdate=\"" + cdate + "\", publtype=\"" + publtype
+        return "key=\"" + key + "\", publrecord=\"" + publrecord + "\" mdate=\"" + mdate + "\", publtype=\"" + publtype
                 + "\" authors=" + this.authors;
     }
 }

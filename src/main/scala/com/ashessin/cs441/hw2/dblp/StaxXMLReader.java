@@ -12,7 +12,6 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,16 +68,13 @@ public class StaxXMLReader {
                         Attribute keyAttr = startElement.getAttributeByName(new QName("key"));
                         //Get the 'mdate' attribute from publication element
                         Attribute mdateAttr = startElement.getAttributeByName(new QName("mdate"));
-                        //Get the 'cdate' attribute from publication element
-                        Attribute cdateAttr = startElement.getAttributeByName(new QName("cdate"));
                         //Get the 'publtype' attribute from publication element
                         Attribute publtypeAttr = startElement.getAttributeByName(new QName("publtype"));
                         if (keyAttr != null) {
                             pub = new Publication(keyAttr.getValue(),
-                                    mdateAttr != null ? mdateAttr.getValue() : "",
-                                    cdateAttr != null ? cdateAttr.getValue() : "",
+                                    mdateAttr != null ? Integer.parseInt(mdateAttr.getValue().replaceAll("\\D", "")) : 0,
                                     publtypeAttr != null ? publtypeAttr.getValue() : "",
-                                    publrecord, null, null);
+                                    publrecord, null);
                         }
                     } else if (startElement.getName().getLocalPart().equals("author")) {
                         xmlEvent = xmlEventReader.nextEvent();
@@ -97,7 +93,7 @@ public class StaxXMLReader {
                     System.out.print("Processing node number: " + pubList.size() + "\r");
                 }
             }
-        } catch (FileNotFoundException | XMLStreamException | ParseException e) {
+        } catch (FileNotFoundException | XMLStreamException e) {
             e.printStackTrace();
         }
 
