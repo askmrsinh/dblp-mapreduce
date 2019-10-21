@@ -30,7 +30,7 @@ public class Publication {
         return mdate;
     }
 
-    private void setMdate(int mdate) {
+    public void setMdate(int mdate) {
         this.mdate = mdate;
     }
 
@@ -38,7 +38,7 @@ public class Publication {
         return publtype;
     }
 
-    private void setPubltype(String publtype) {
+    public void setPubltype(String publtype) {
         this.publtype = publtype;
     }
 
