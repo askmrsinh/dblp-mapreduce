@@ -6,6 +6,8 @@ scalaVersion := "2.12.10"
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.2.0"
 libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2"
+
+libraryDependencies += "org.apache.logging.log4j" %% "log4j-api-scala" % "11.0"
 // https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
 libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2"
 
