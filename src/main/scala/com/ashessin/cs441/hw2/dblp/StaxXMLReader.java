@@ -72,7 +72,7 @@ public class StaxXMLReader {
                             pub = new Publication(keyAttr.getValue(),
                                     mdateAttr != null ? Integer.parseInt(mdateAttr.getValue().replaceAll("\\D", "")) : 0,
                                     publtypeAttr != null ? publtypeAttr.getValue() : "",
-                                    publrecord, null);
+                                    publrecord, (ArrayList<String>) authors);
                         }
                     } else if (startElement.getName().getLocalPart().equals("author")) {
                         xmlEvent = xmlEventReader.nextEvent();

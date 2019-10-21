@@ -1,6 +1,7 @@
 package com.ashessin.cs441.hw2.dblp;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Publication {
@@ -8,9 +9,9 @@ public class Publication {
     private int mdate;
     private String publtype;
     private String publrecord;
-    private List<String> authors;
+    private ArrayList<String> authors;
 
-    Publication(String key, @Nullable int mdate, @Nullable String publtype, String publrecord, @Nullable List<String> authors) {
+    Publication(String key, @Nullable int mdate, @Nullable String publtype, String publrecord, @Nullable ArrayList<String> authors) {
         this.key = key;
         this.mdate = mdate;
         this.publtype = publtype;
@@ -55,7 +56,7 @@ public class Publication {
     }
 
     public void setAuthors(List<String> authors) {
-        this.authors = authors;
+        this.authors = (ArrayList<String>) authors;
     }
 
     @Override
