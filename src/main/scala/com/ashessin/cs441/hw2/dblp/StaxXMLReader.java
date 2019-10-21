@@ -88,7 +88,7 @@ public class StaxXMLReader {
                         }
                         pubList.add(pub);
                     }
-                    System.out.print("Processing node number: " + pubList.size() + "\r");
+                    System.out.print("Publications processed: " + pubList.size() + "\r");
                 }
             }
         } catch (FileNotFoundException | XMLStreamException e) {
