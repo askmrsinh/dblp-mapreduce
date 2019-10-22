@@ -30,9 +30,9 @@ public class StaxXMLReader {
         long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long end = System.currentTimeMillis();
 
-        System.out.println("StAX (" + pubList.size() + "): Memory used (bytes): "
+        System.out.println("StAX XML Parser, Memory used (bytes): "
                 + (memend - memstart));
-        System.out.println("StAX (" + pubList.size() + "): Time taken (ms): "
+        System.out.println("StAX XML Parser, Time taken (ms): "
                 + (end - start));
     }
 
@@ -70,19 +70,22 @@ public class StaxXMLReader {
                         authors = new ArrayList<>();
                         //Get the 'key' attribute from publication element
                         Attribute keyAttr = startElement.getAttributeByName(new QName("key"));
-                        //Get the 'mdate' attribute from publication element
-                        Attribute mdateAttr = startElement.getAttributeByName(new QName("mdate"));
                         //Get the 'publtype' attribute from publication element
                         Attribute publtypeAttr = startElement.getAttributeByName(new QName("publtype"));
                         if (keyAttr != null) {
-                            pub = new Publication(keyAttr.getValue(),
-                                    mdateAttr != null ? Integer.parseInt(mdateAttr.getValue().replaceAll("\\D", "")) : 0,
+                            pub = new Publication(keyAttr.getValue(), 0,
                                     publtypeAttr != null ? publtypeAttr.getValue() : "",
-                                    publrecord, (ArrayList<String>) authors);
+                                    publrecord, (ArrayList<String>) authors, "");
                         }
                     } else if (startElement.getName().getLocalPart().equals("author")) {
                         xmlEvent = xmlEventReader.nextEvent();
                         authors.add(xmlEvent.asCharacters().getData());
+                    } else if (startElement.getName().getLocalPart().equals("journal")) {
+                        xmlEvent = xmlEventReader.nextEvent();
+                        pub.setJournal(xmlEvent.asCharacters().getData());
+                    } else if (startElement.getName().getLocalPart().equals("year")) {
+                        xmlEvent = xmlEventReader.nextEvent();
+                        pub.setYear(Integer.parseInt(xmlEvent.asCharacters().getData()));
                     }
                 }
 

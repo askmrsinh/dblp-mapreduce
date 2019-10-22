@@ -43,7 +43,6 @@ public class PublicationsSequenceFileWriter extends Configured implements Tool {
         Configuration conf = super.getConf();
 
         String inputFile = args[0];
-
         Path outputPath = new Path(new URI("hdfs://localhost:9000" + args[1]));
 
         SequenceFile.Writer writer = SequenceFile.createWriter(conf,
@@ -59,8 +58,8 @@ public class PublicationsSequenceFileWriter extends Configured implements Tool {
             Text k = new Text();
 
             for (Publication pub : StaxXMLReader.parseXML(inputFile)) {
-                PublicationWritable publication = new PublicationWritable(pub.getKey(), pub.getMdate(), pub.getPubltype(),
-                        pub.getPublrecord(), (ArrayList<String>) pub.getAuthors());
+                PublicationWritable publication = new PublicationWritable(pub.getKey(), pub.getYear(), pub.getPubltype(),
+                        pub.getPublrecord(), (ArrayList<String>) pub.getAuthors(), pub.getJournal());
 
                 //System.out.println("Publication :: " + publication);
 

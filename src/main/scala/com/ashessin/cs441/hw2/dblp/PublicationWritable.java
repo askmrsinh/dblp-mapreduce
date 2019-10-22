@@ -13,20 +13,22 @@ import java.util.List;
 
 public class PublicationWritable implements WritableComparable<PublicationWritable> {
     private String key;
-    private int mdate;
+    private int year;
     private String publtype;
     private String publrecord;
     private List<String> authors;
+    private String journal;
 
     PublicationWritable() {
     }
 
-    PublicationWritable(String key, @Nullable int mdate, @Nullable String publtype, String publrecord, @Nullable ArrayList<String> authors) {
+    PublicationWritable(String key, @Nullable int year, @Nullable String publtype, String publrecord, @Nullable ArrayList<String> authors, @Nullable String journal) {
         this.key = key;
-        this.mdate = mdate;
+        this.year = year;
         this.publtype = publtype;
         this.publrecord = publrecord;
         this.authors = authors;
+        this.journal = journal;
     }
 
     public String getKey() {
@@ -37,12 +39,12 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
         this.key = key;
     }
 
-    public int getMdate() {
-        return mdate;
+    public int getYear() {
+        return year;
     }
 
-    public void setMdate(int mdate) {
-        this.mdate = mdate;
+    public void setYear(int year) {
+        this.year = year;
     }
 
     public String getPubltype() {
@@ -71,8 +73,8 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
 
     @Override
     public String toString() {
-        return "key=\"" + key + "\", publrecord=\"" + publrecord + "\" mdate=" + mdate + ", publtype=\"" + publtype
-                + "\" authors=" + this.authors;
+        return "key=\"" + key + "\", publrecord=\"" + publrecord + "\" year=" + year + ", publtype=\"" + publtype
+                + "\" authors=" + this.authors + "\" journal=\"" + this.journal + "\"";
     }
 
     @Override
@@ -89,10 +91,11 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
     @Override
     public void write(DataOutput out) throws IOException {
         WritableUtils.writeString(out, key);
-        out.writeInt(mdate);
+        out.writeInt(year);
         WritableUtils.writeString(out, publtype);
         WritableUtils.writeString(out, publrecord);
         WritableUtils.writeStringArray(out, authors.toArray(new String[0]));
+        WritableUtils.writeString(out, journal);
     }
 
     /**
@@ -107,9 +110,10 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
     @Override
     public void readFields(DataInput in) throws IOException {
         key = WritableUtils.readString(in);
-        mdate = in.readInt();
+        year = in.readInt();
         publtype = WritableUtils.readString(in);
         publrecord = WritableUtils.readString(in);
         authors = Arrays.asList(WritableUtils.readStringArray(in));
+        journal = WritableUtils.readString(in);
     }
 }
