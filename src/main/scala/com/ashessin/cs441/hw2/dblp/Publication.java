@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Publication {
+public class Publication implements java.io.Serializable {
     private String key;
     private int mdate;
     private String publtype;
