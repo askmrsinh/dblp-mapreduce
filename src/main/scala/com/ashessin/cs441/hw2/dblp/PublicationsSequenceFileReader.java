@@ -48,7 +48,7 @@ public class PublicationsSequenceFileReader extends Configured implements Tool {
             System.out.println("Is block compressed = " + reader.isBlockCompressed());
 
             Text k = new Text();
-            PublicationsWritable value = new PublicationsWritable();
+            PublicationWritable value = new PublicationWritable();
 
             while (reader.next(k, value)) {
                 System.out.println(k + "\t" + value);

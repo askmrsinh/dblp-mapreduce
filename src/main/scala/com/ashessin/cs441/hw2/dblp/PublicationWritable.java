@@ -11,17 +11,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PublicationsWritable implements WritableComparable<PublicationsWritable> {
+public class PublicationWritable implements WritableComparable<PublicationWritable> {
     private String key;
     private int mdate;
     private String publtype;
     private String publrecord;
     private List<String> authors;
 
-    PublicationsWritable() {
+    PublicationWritable() {
     }
 
-    PublicationsWritable(String key, @Nullable int mdate, @Nullable String publtype, String publrecord, @Nullable ArrayList<String> authors) {
+    PublicationWritable(String key, @Nullable int mdate, @Nullable String publtype, String publrecord, @Nullable ArrayList<String> authors) {
         this.key = key;
         this.mdate = mdate;
         this.publtype = publtype;
@@ -76,8 +76,8 @@ public class PublicationsWritable implements WritableComparable<PublicationsWrit
     }
 
     @Override
-    public int compareTo(PublicationsWritable publicationsWritable) {
-        return key.compareTo(publicationsWritable.getKey());
+    public int compareTo(PublicationWritable publicationWritable) {
+        return key.compareTo(publicationWritable.getKey());
     }
 
     /**

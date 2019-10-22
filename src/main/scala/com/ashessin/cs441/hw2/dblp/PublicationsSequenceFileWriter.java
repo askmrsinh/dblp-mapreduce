@@ -49,7 +49,7 @@ public class PublicationsSequenceFileWriter extends Configured implements Tool {
         SequenceFile.Writer writer = SequenceFile.createWriter(conf,
                 SequenceFile.Writer.file(outputPath),
                 SequenceFile.Writer.keyClass(Text.class),
-                SequenceFile.Writer.valueClass(PublicationsWritable.class),
+                SequenceFile.Writer.valueClass(PublicationWritable.class),
                 SequenceFile.Writer.compression(
                         SequenceFile.CompressionType.BLOCK,
                         new DefaultCodec())
@@ -59,10 +59,10 @@ public class PublicationsSequenceFileWriter extends Configured implements Tool {
             Text k = new Text();
 
             for (Publication pub : StaxXMLReader.parseXML(inputFile)) {
-                PublicationsWritable publication = new PublicationsWritable(pub.getKey(), pub.getMdate(), pub.getPubltype(),
+                PublicationWritable publication = new PublicationWritable(pub.getKey(), pub.getMdate(), pub.getPubltype(),
                         pub.getPublrecord(), (ArrayList<String>) pub.getAuthors());
 
-                System.out.println("Publication :: " + publication);
+                //System.out.println("Publication :: " + publication);
 
                 k.set(publication.getKey());
 
