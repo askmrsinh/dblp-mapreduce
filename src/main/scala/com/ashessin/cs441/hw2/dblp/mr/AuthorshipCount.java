@@ -1,5 +1,6 @@
-package com.ashessin.cs441.hw2.dblp;
+package com.ashessin.cs441.hw2.dblp.mr;
 
+import com.ashessin.cs441.hw2.dblp.PublicationWritable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
@@ -18,9 +19,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 
-public class TopAuthorsMapperReducer extends Configured implements Tool {
+public class AuthorshipCount extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
-        int res = ToolRunner.run(new Configuration(), new TopAuthorsMapperReducer(), args);
+        int res = ToolRunner.run(new Configuration(), new AuthorshipCount(), args);
         System.exit(res);
     }
 
@@ -39,7 +40,7 @@ public class TopAuthorsMapperReducer extends Configured implements Tool {
         Path outputPath = new Path(new URI("hdfs://localhost:9000" + args[1]));
 
         Job job = Job.getInstance(conf, "Dblp Top Authors");
-        job.setJarByClass(TopAuthorsMapperReducer.class);
+        job.setJarByClass(AuthorshipCount.class);
         job.setMapperClass(DblpMapper.class);
         job.setCombinerClass(DblpReducer.class);
         job.setReducerClass(DblpReducer.class);
