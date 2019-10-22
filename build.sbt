@@ -12,13 +12,14 @@ assemblyMergeStrategy in assembly := {
 }
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(cacheOutput = false)
 
-libraryDependencies += "org.apache.logging.log4j" %% "log4j-api-scala" % "11.0"
-// https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
-libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2"
+libraryDependencies ++= Seq(
+  "org.apache.logging.log4j" %% "log4j-api-scala" % "11.0",
+  "com.google.code.findbugs" % "jsr305" % "3.0.2",
 
-// https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-client
-libraryDependencies += "org.apache.hadoop" % "hadoop-client" % "3.2.1"
-// https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-hdfs
-libraryDependencies += "org.apache.hadoop" % "hadoop-hdfs" % "3.2.1"
-// https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-common
-libraryDependencies += "org.apache.hadoop" % "hadoop-common" % "3.2.1"
+  // https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-client
+  "org.apache.hadoop" % "hadoop-client" % "3.2.1",
+  // https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-hdfs
+  "org.apache.hadoop" % "hadoop-hdfs" % "3.2.1",
+  // https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-common
+  "org.apache.hadoop" % "hadoop-common" % "3.2.1"
+)
