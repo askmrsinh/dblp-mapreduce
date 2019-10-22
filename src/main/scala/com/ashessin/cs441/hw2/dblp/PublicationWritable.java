@@ -71,6 +71,14 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
         this.authors = authors;
     }
 
+    public String getJournal() {
+        return journal;
+    }
+
+    public void setJournal(String journal) {
+        this.journal = journal;
+    }
+
     @Override
     public String toString() {
         return "key=\"" + key + "\", publrecord=\"" + publrecord + "\" year=" + year + ", publtype=\"" + publtype
