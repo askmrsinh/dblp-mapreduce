@@ -4,6 +4,14 @@ version := "0.1"
 
 scalaVersion := "2.12.10"
 
+assemblyMergeStrategy in assembly := {
+  case "dblp.xml" => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}
+assemblyOption in assembly := (assemblyOption in assembly).value.copy(cacheOutput = false)
+
 libraryDependencies += "org.apache.logging.log4j" %% "log4j-api-scala" % "11.0"
 // https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
 libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2"
