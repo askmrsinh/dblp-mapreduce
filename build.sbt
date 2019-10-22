@@ -6,6 +6,7 @@ scalaVersion := "2.12.10"
 
 assemblyMergeStrategy in assembly := {
   case "dblp.xml" => MergeStrategy.discard
+  case "main.log" => MergeStrategy.discard
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
