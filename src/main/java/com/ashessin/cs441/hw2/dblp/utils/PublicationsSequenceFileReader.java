@@ -39,12 +39,11 @@ public class PublicationsSequenceFileReader extends Configured implements Tool {
     public int run(String[] args) throws Exception {
         Configuration conf = super.getConf();
 
-        Path inputFile = new Path(new URI("hdfs://localhost:9000" + args[0]));
+        final String HDFS = "hdfs://localhost:9000";
+        Path inputFilePath = new Path(new URI(HDFS + args[0]));
 
-        SequenceFile.Reader reader = new SequenceFile.Reader(conf,
-                SequenceFile.Reader.file(inputFile));
-
-        try {
+        try (SequenceFile.Reader reader = new SequenceFile.Reader(conf,
+                SequenceFile.Reader.file(inputFilePath))) {
             System.out.println("Is block compressed = " + reader.isBlockCompressed());
 
             Text k = new Text();
@@ -53,8 +52,6 @@ public class PublicationsSequenceFileReader extends Configured implements Tool {
             while (reader.next(k, value)) {
                 System.out.println(k + "\t" + value);
             }
-        } finally {
-            reader.close();
         }
 
         return 0;
