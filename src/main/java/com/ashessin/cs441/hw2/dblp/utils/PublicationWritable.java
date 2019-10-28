@@ -1,4 +1,4 @@
-package dblp.utils;
+package com.ashessin.cs441.hw2.dblp.utils;
 
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableUtils;

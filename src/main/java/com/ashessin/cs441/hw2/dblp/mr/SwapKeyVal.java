@@ -1,4 +1,4 @@
-package dblp.mr;
+package com.ashessin.cs441.hw2.dblp.mr;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;

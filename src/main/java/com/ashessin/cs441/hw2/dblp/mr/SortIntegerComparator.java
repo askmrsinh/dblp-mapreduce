@@ -1,4 +1,4 @@
-package dblp.mr;
+package com.ashessin.cs441.hw2.dblp.mr;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.WritableComparable;

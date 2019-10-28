@@ -1,4 +1,4 @@
-package dblp.utils;
+package com.ashessin.cs441.hw2.dblp.utils;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;

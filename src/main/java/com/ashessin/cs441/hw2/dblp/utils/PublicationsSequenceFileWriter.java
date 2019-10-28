@@ -1,4 +1,4 @@
-package dblp.utils;
+package com.ashessin.cs441.hw2.dblp.utils;
 
 import com.ctc.wstx.api.WstxInputProperties;
 import org.apache.hadoop.conf.Configuration;
