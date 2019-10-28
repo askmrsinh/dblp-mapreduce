@@ -1,4 +1,4 @@
-package com.ashessin.cs441.hw2.dblp;
+package dblp.utils;
 
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableUtils;
@@ -13,21 +13,21 @@ import java.util.List;
 
 public class PublicationWritable implements WritableComparable<PublicationWritable> {
     private String key;
-    private int year;
-    private String publtype;
     private String publrecord;
+    private String publtype;
     private List<String> authors;
+    private int year;
     private String journal;
 
     PublicationWritable() {
     }
 
-    PublicationWritable(String key, @Nullable int year, @Nullable String publtype, String publrecord, @Nullable ArrayList<String> authors, @Nullable String journal) {
+    PublicationWritable(String key, String publrecord, @Nullable String publtype, @Nullable ArrayList<String> authors, int year, @Nullable String journal) {
         this.key = key;
-        this.year = year;
-        this.publtype = publtype;
         this.publrecord = publrecord;
+        this.publtype = publtype;
         this.authors = authors;
+        this.year = year;
         this.journal = journal;
     }
 
@@ -39,12 +39,12 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
         this.key = key;
     }
 
-    public int getYear() {
-        return year;
+    public String getPublrecord() {
+        return publrecord;
     }
 
-    public void setYear(int year) {
-        this.year = year;
+    public void setPublrecord(String publrecord) {
+        this.publrecord = publrecord;
     }
 
     public String getPubltype() {
@@ -55,20 +55,20 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
         this.publtype = publtype;
     }
 
-    public String getPublrecord() {
-        return publrecord;
-    }
-
-    public void setPublrecord(String publrecord) {
-        this.publrecord = publrecord;
-    }
-
     public List<String> getAuthors() {
         return authors;
     }
 
     public void setAuthors(List<String> authors) {
         this.authors = authors;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
     }
 
     public String getJournal() {
@@ -81,8 +81,8 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
 
     @Override
     public String toString() {
-        return "key=\"" + key + "\", publrecord=\"" + publrecord + "\" year=" + year + ", publtype=\"" + publtype
-                + "\" authors=" + this.authors + "\" journal=\"" + this.journal + "\"";
+        return "key=\"" + key + "\", publrecord=\"" + publrecord + "\", publtype=\"" + publtype
+                + "\" authors=" + this.authors + ", year=" + year + ", journal=\"" + this.journal + "\"";
     }
 
     @Override
@@ -99,10 +99,10 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
     @Override
     public void write(DataOutput out) throws IOException {
         WritableUtils.writeString(out, key);
-        out.writeInt(year);
-        WritableUtils.writeString(out, publtype);
         WritableUtils.writeString(out, publrecord);
+        WritableUtils.writeString(out, publtype);
         WritableUtils.writeStringArray(out, authors.toArray(new String[0]));
+        out.writeInt(year);
         WritableUtils.writeString(out, journal);
     }
 
@@ -118,10 +118,10 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
     @Override
     public void readFields(DataInput in) throws IOException {
         key = WritableUtils.readString(in);
-        year = in.readInt();
-        publtype = WritableUtils.readString(in);
         publrecord = WritableUtils.readString(in);
+        publtype = WritableUtils.readString(in);
         authors = Arrays.asList(WritableUtils.readStringArray(in));
+        year = in.readInt();
         journal = WritableUtils.readString(in);
     }
 }
