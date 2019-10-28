@@ -68,11 +68,18 @@ public class PublicationsSequenceFileWriter extends Configured implements Tool {
 
         PublicationWritable pub = null;
         int counter = 0;
+        Text k = new Text();
+
         String publrecord = "";
         ArrayList<String> authors = null;
+        ArrayList<String> editors = null;
         int year = -1;
         String journal = "";
-        Text k = new Text();
+        ArrayList<String> urls = null;
+        ArrayList<String> ees = null;
+        ArrayList<String> cites = null;
+        String crossref = "";
+        ArrayList<String> schools = null;
 
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
         // disable resolving of external DTD entities
@@ -110,34 +117,73 @@ public class PublicationsSequenceFileWriter extends Configured implements Tool {
                     if (isPubicationRecord(startElementName)) {
                         publrecord = startElementName;
                         authors = new ArrayList<>();
+                        editors = new ArrayList<>();
+                        urls = new ArrayList<>();
+                        ees = new ArrayList<>();
+                        cites = new ArrayList<>();
+                        schools = new ArrayList<>();
                         //Get the 'key' attribute from publication element
                         Attribute keyAttr = startElement.getAttributeByName(new QName("key"));
                         //Get the 'publtype' attribute from publication element
                         Attribute publtypeAttr = startElement.getAttributeByName(new QName("publtype"));
                         pub = new PublicationWritable(keyAttr.getValue(), publrecord,
                                 publtypeAttr != null ? publtypeAttr.getValue() : "",
-                                authors, year, journal);
+                                authors, editors, year, journal, urls, ees, cites, crossref, schools);
                     } else if (startElement.getName().getLocalPart().equals("author")) {
                         xmlEvent = xmlEventReader.nextEvent();
                         authors.add(xmlEvent.asCharacters().getData());
+                    } else if (startElement.getName().getLocalPart().equals("editor")) {
+                        xmlEvent = xmlEventReader.nextEvent();
+                        editors.add(xmlEvent.asCharacters().getData());
                     } else if (startElement.getName().getLocalPart().equals("year")) {
                         xmlEvent = xmlEventReader.nextEvent();
                         pub.setYear(Integer.parseInt(xmlEvent.asCharacters().getData()));
                     } else if (startElement.getName().getLocalPart().equals("journal")) {
                         xmlEvent = xmlEventReader.nextEvent();
                         pub.setJournal(xmlEvent.asCharacters().getData());
+                    } else if (startElement.getName().getLocalPart().equals("url")) {
+                        xmlEvent = xmlEventReader.nextEvent();
+                        urls.add(xmlEvent.asCharacters().getData());
+                    } else if (startElement.getName().getLocalPart().equals("ee")) {
+                        xmlEvent = xmlEventReader.nextEvent();
+                        ees.add(xmlEvent.asCharacters().getData());
+                    } else if (startElement.getName().getLocalPart().equals("cite")) {
+                        xmlEvent = xmlEventReader.nextEvent();
+                        cites.add(xmlEvent.asCharacters().getData());
+                    } else if (startElement.getName().getLocalPart().equals("crossref")) {
+                        xmlEvent = xmlEventReader.nextEvent();
+                        pub.setCrossref(xmlEvent.asCharacters().getData());
+                    } else if (startElement.getName().getLocalPart().equals("school")) {
+                        xmlEvent = xmlEventReader.nextEvent();
+                        schools.add(xmlEvent.asCharacters().getData());
                     }
                 }
 
                 if (xmlEvent.isEndElement()) {
                     EndElement endElement = xmlEvent.asEndElement();
                     if (endElement.getName().getLocalPart().equals(publrecord)) {
-                        if (!authors.isEmpty()) {
+                        if (authors != null && !authors.isEmpty()) {
                             pub.setAuthors(authors);
+                        }
+                        if (editors != null && !editors.isEmpty()) {
+                            pub.setEditors(editors);
+                        }
+                        if (urls != null && !urls.isEmpty()) {
+                            pub.setUrls(urls);
+                        }
+                        if (editors != null && !ees.isEmpty()) {
+                            pub.setEes(ees);
+                        }
+                        if (cites != null && !cites.isEmpty()) {
+                            pub.setCites(cites);
+                        }
+                        if (schools != null && !schools.isEmpty()) {
+                            pub.setSchool(schools);
                         }
                         k.set(pub.getKey());
                         writer.append(k, pub);
                         counter += 1;
+                        // System.out.println(pub.toString());
                         System.out.print("Publications processed: " + counter + "\r");
                     }
                 }

@@ -16,8 +16,15 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
     private String publrecord;
     private String publtype;
     private List<String> authors;
+    private List<String> editors;
     private int year;
     private String journal;
+    private List<String> urls;
+    private List<String> ees;
+    private List<String> cites;
+    private String crossref;
+    private List<String> schools;
+
 
     PublicationWritable() {
     }
@@ -26,9 +33,21 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
         this.key = key;
         this.publrecord = publrecord;
         this.publtype = publtype;
+    }
+
+    public PublicationWritable(String key, String publrecord, String publtype, List<String> authors, List<String> editors, int year, String journal, List<String> urls, List<String> ees, List<String> cites, String crossref, List<String> schools) {
+        this.key = key;
+        this.publrecord = publrecord;
+        this.publtype = publtype;
         this.authors = authors;
+        this.editors = editors;
         this.year = year;
         this.journal = journal;
+        this.urls = urls;
+        this.ees = ees;
+        this.cites = cites;
+        this.crossref = crossref;
+        this.schools = schools;
     }
 
     public String getKey() {
@@ -63,6 +82,14 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
         this.authors = authors;
     }
 
+    public List<String> getEditors() {
+        return editors;
+    }
+
+    public void setEditors(List<String> editors) {
+        this.editors = editors;
+    }
+
     public int getYear() {
         return year;
     }
@@ -79,10 +106,52 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
         this.journal = journal;
     }
 
+    public List<String> getUrls() {
+        return urls;
+    }
+
+    public void setUrls(List<String> urls) {
+        this.urls = urls;
+    }
+
+    public List<String> getEes() {
+        return ees;
+    }
+
+    public void setEes(List<String> ees) {
+        this.ees = ees;
+    }
+
+    public List<String> getCites() {
+        return cites;
+    }
+
+    public void setCites(List<String> cites) {
+        this.cites = cites;
+    }
+
+    public String getCrossref() {
+        return crossref;
+    }
+
+    public void setCrossref(String crossref) {
+        this.crossref = crossref;
+    }
+
+    public List<String> getSchool() {
+        return schools;
+    }
+
+    public void setSchool(List<String> schools) {
+        this.schools = schools;
+    }
+
     @Override
     public String toString() {
         return "key=\"" + key + "\", publrecord=\"" + publrecord + "\", publtype=\"" + publtype
-                + "\" authors=" + this.authors + ", year=" + year + ", journal=\"" + this.journal + "\"";
+                + "\", authors=" + this.authors + "\", editors=" + this.editors + ", year=" + year
+                + ", journal=\"" + this.journal + "\", urls=" + this.urls + ", ees=" + this.ees
+                + ", cites=" + this.cites + ", crossref=\"" + this.crossref + "\", schools=" + this.schools;
     }
 
     @Override
