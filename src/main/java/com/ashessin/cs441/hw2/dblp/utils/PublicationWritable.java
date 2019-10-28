@@ -171,8 +171,14 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
         WritableUtils.writeString(out, publrecord);
         WritableUtils.writeString(out, publtype);
         WritableUtils.writeStringArray(out, authors.toArray(new String[0]));
+        WritableUtils.writeStringArray(out, editors.toArray(new String[0]));
         out.writeInt(year);
         WritableUtils.writeString(out, journal);
+        WritableUtils.writeStringArray(out, urls.toArray(new String[0]));
+        WritableUtils.writeStringArray(out, ees.toArray(new String[0]));
+        WritableUtils.writeStringArray(out, cites.toArray(new String[0]));
+        WritableUtils.writeString(out, crossref);
+        WritableUtils.writeStringArray(out, schools.toArray(new String[0]));
     }
 
     /**
@@ -190,7 +196,13 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
         publrecord = WritableUtils.readString(in);
         publtype = WritableUtils.readString(in);
         authors = Arrays.asList(WritableUtils.readStringArray(in));
+        editors = Arrays.asList(WritableUtils.readStringArray(in));
         year = in.readInt();
         journal = WritableUtils.readString(in);
+        urls = Arrays.asList(WritableUtils.readStringArray(in));
+        ees = Arrays.asList(WritableUtils.readStringArray(in));
+        cites = Arrays.asList(WritableUtils.readStringArray(in));
+        crossref = WritableUtils.readString(in);
+        schools = Arrays.asList(WritableUtils.readStringArray(in));
     }
 }
