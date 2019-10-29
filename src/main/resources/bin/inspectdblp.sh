@@ -1,41 +1,39 @@
 #!/bin/bash
 
+# What do I find in dblp.xml? 
+# https://dblp.uni-trier.de/faq/16154937.html
+
+# https://www.openoffice.org/bibliographic/bibtex-defs.html
+# https://www.andy-roberts.net/res/writing/latex/bibentries.pdf
+
 dblp_xml_filepath=$1
 
-grep -o '</article>\|</inproceedings>\|</proceedings>\|</book>\|</incollection>\|</phdthesis>\|</mastersthesis>\|</www>|</data>' "$dblp_xml_filepath" | wc -l
+echo -e "\e[34mInspecting $dblp_xml_filepath for tags.\e[0m"
 
+dblp_count=$(grep -o '</article>\|</inproceedings>\|</proceedings>\|</book>\|</incollection>\|</phdthesis>\|</mastersthesis>\|</www>|</data>' "$dblp_xml_filepath" | wc -l)
+echo -e "\e[34mFound $dblp_count publication elements."
+echo ""
 
-grep -o '</article>' "$dblp_xml_filepath" | wc -l
-grep -o '</inproceedings>' "$dblp_xml_filepath" | wc -l
-grep -o '</proceedings>' "$dblp_xml_filepath" | wc -l
-grep -o '</book>' "$dblp_xml_filepath" | wc -l
-grep -o '</incollection>' "$dblp_xml_filepath"| wc -l
-grep -o '</phdthesis>' "$dblp_xml_filepath"| wc -l
-grep -o '</mastersthesis>' "$dblp_xml_filepath"| wc -l
-grep -o '</www>' "$dblp_xml_filepath"| wc -l
-grep -o '</person>' "$dblp_xml_filepath"| wc -l
-grep -o '</data>' "$dblp_xml_filepath"| wc -l
+echo -e "\e[34mCounting each child of the 'dblp' root element...\e[0m"
+dblp_elements=(article inproceedings proceedings book incollection phdthesis mastersthesis www person data)
+for i in "${dblp_elements[@]}"; do
+    count=$(grep -o "</$i>" "$dblp_xml_filepath" | wc -l)
+    echo "'$i': $count"
+done
+echo ""
 
+echo -e "\e[34mCounting each grandchild of the 'dblp' root element...\e[0m"
+other_elements=(author editor title booktitle pages year address journal volume number month url ee cdrom cite publisher crossref isbn series school chapter publnr)
+for i in "${other_elements[@]}"; do
+    count=$(grep -o "</$i>" "$dblp_xml_filepath" | wc -l)
+    echo "'$i': $count"
+done
 
-pcregrep -Mi "</author>([\s].*)?<author>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</editor>([\s].*)?<editor>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</title>([\s].*)?<title>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</booktitle>([\s].*)?<booktitle>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</pages>([\s].*)?<pages>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</year>([\s].*)?<year>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</address>([\s].*)?<address>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</journal>([\s].*)?<journal>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</volume>([\s].*)?<volume>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</number>([\s].*)?<number>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</month>([\s].*)?<month>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</url>([\s].*)?<url>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</ee>([\s].*)?<ee>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</cdrom>([\s].*)?<cdrom>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</cite>([\s].*)?<cite>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</publisher>([\s].*)?<publisher>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</crossref>([\s].*)?<crossref>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</isbn>([\s].*)?<isbn>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</series>([\s].*)?<series>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</school>([\s].*)?<school>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</chapter>([\s].*)?<chapter>" "$dblp_xml_filepath" | wc -l
-pcregrep -Mi "</publnr>([\s].*)?<publnr>" "$dblp_xml_filepath" | wc -l
+command -v pcregrep >/dev/null 2>&1 || { echo >&2 'Require `pcregrep` but it is not installed. Aborting.'; exit 1; }
+echo ""
+
+echo -e "\e[34mCounting identical sibling(s) that are grandchildren of the 'dblp' root element...\e[0m"
+for i in "${other_elements[@]}"; do
+    count=$(pcregrep -Mi "</$i>([\s].*)?<$i>" "$dblp_xml_filepath" | wc -l)
+    echo "'</$i>...<$i>': $count"
+done
