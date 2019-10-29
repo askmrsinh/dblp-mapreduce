@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -38,21 +39,23 @@ public class SimpleCount extends Configured implements Tool {
     @Override
     public int run(String[] args) throws Exception {
         Configuration conf = super.getConf();
+        conf.set("mapreduce.input.keyvaluelinerecordreader.key.value.separator", "\t\t");
+        conf.set(TextOutputFormat.SEPARATOR, "\t\t");
 
         final String HDFS = "hdfs://localhost:9000";
         Path inputFile = new Path(new URI(HDFS + args[0]));
         Path outputPath = new Path(new URI(HDFS + args[1]));
-        DblpMapper.setRequiredField(args[2].toLowerCase());
+        DblpSimpleCountMapper.setRequiredField(args[2].toLowerCase());
 
         FileSystem hdfs = FileSystem.get(URI.create(HDFS), conf);
-        // delete existing directory
+        // delete existing hdfs target directory
         if (hdfs.exists(outputPath)) {
             hdfs.delete(outputPath, true);
         }
 
         Job job = Job.getInstance(conf, "Dblp Simple Count");
         job.setJarByClass(SimpleCount.class);
-        job.setMapperClass(DblpMapper.class);
+        job.setMapperClass(DblpSimpleCountMapper.class);
         job.setReducerClass(IntSumReducer.class);
         job.setInputFormatClass(SequenceFileInputFormat.class);
         job.setOutputKeyClass(Text.class);
@@ -67,7 +70,7 @@ public class SimpleCount extends Configured implements Tool {
         return 1;
     }
 
-    public static class DblpMapper extends Mapper<Text, PublicationWritable, Text, IntWritable> {
+    public static class DblpSimpleCountMapper extends Mapper<Text, PublicationWritable, Text, IntWritable> {
 
         private static final IntWritable ONE = new IntWritable(1);
         private static String requiredField;
