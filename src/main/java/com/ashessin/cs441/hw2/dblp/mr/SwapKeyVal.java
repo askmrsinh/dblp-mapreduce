@@ -34,8 +34,9 @@ public class SwapKeyVal extends Configured implements Tool {
     public int run(String[] args) throws Exception {
         Configuration conf = super.getConf();
 
-        Path inputFile = new Path(new URI("hdfs://localhost:9000" + args[0]));
-        Path outputPath = new Path(new URI("hdfs://localhost:9000" + args[1]));
+        final String HDFS = "hdfs://localhost:9000";
+        Path inputFile = new Path(new URI(HDFS + args[0]));
+        Path outputPath = new Path(new URI(HDFS + args[1]));
 
         Job job = Job.getInstance(conf, "Swap Key Value pairs");
         job.setJarByClass(SwapKeyVal.class);
