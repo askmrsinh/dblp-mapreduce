@@ -161,7 +161,7 @@ public class PublicationsSequenceFileWriter extends Configured implements Tool {
 
                 if (xmlEvent.isEndElement()) {
                     EndElement endElement = xmlEvent.asEndElement();
-                    if (endElement.getName().getLocalPart().equals(publrecord)) {
+                    if (endElement.getName().getLocalPart().equals(publrecord) && (pub != null)) {
                         if (authors != null && !authors.isEmpty()) {
                             pub.setAuthors(authors);
                         }
