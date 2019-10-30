@@ -39,8 +39,9 @@ public class SimpleCount extends Configured implements Tool {
     @Override
     public int run(String[] args) throws Exception {
         Configuration conf = super.getConf();
-        conf.set("mapreduce.input.keyvaluelinerecordreader.key.value.separator", "\t\t");
-        conf.set(TextOutputFormat.SEPARATOR, "\t\t");
+        conf.set("mapred.compress.map.output", "true");
+        conf.set("mapred.output.compression.type", "BLOCK");
+        conf.set("mapred.map.output.compression.codec", "org.apache.hadoop.io.compress.DefaultCodec");
 
         final String HDFS = "hdfs://localhost:9000";
         Path inputFile = new Path(new URI(HDFS + args[0]));
@@ -55,11 +56,15 @@ public class SimpleCount extends Configured implements Tool {
 
         Job job = Job.getInstance(conf, "Dblp Simple Count");
         job.setJarByClass(SimpleCount.class);
-        job.setMapperClass(DblpSimpleCountMapper.class);
-        job.setReducerClass(IntSumReducer.class);
         job.setInputFormatClass(SequenceFileInputFormat.class);
+        job.setMapperClass(DblpSimpleCountMapper.class);
+        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(IntWritable.class);
+        job.setCombinerClass(IntSumReducer.class);
+        job.setReducerClass(IntSumReducer.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
 
         FileInputFormat.setInputPaths(job, inputFile);
         FileOutputFormat.setOutputPath(job, outputPath);

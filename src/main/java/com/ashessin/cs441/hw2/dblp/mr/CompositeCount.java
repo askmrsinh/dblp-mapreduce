@@ -6,13 +6,15 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.compress.DefaultCodec;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -23,6 +25,9 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.setOutputCompressorClass;
+import static org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat.*;
 
 public class CompositeCount extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
@@ -40,8 +45,9 @@ public class CompositeCount extends Configured implements Tool {
     @Override
     public int run(String[] args) throws Exception {
         Configuration conf = super.getConf();
-        conf.set("mapreduce.input.keyvaluelinerecordreader.key.value.separator", "\t\t");
-        conf.set(TextOutputFormat.SEPARATOR, "\t\t");
+        conf.set("mapred.compress.map.output", "true");
+        conf.set("mapred.output.compression.type", "BLOCK");
+        conf.set("mapred.map.output.compression.codec", "org.apache.hadoop.io.compress.DefaultCodec");
 
         final String HDFS = "hdfs://localhost:9000";
         Path inputFile = new Path(new URI(HDFS + args[0]));
@@ -54,16 +60,23 @@ public class CompositeCount extends Configured implements Tool {
             hdfs.delete(outputPath, true);
         }
 
-        Job job = Job.getInstance(conf, "Dblp Simple Composite Count");
+        Job job = Job.getInstance(conf, "Dblp Composite Count");
         job.setJarByClass(CompositeCount.class);
-        job.setMapperClass(DblpCompositeCountMapper.class);
-        job.setReducerClass(IntSumReducer.class);
         job.setInputFormatClass(SequenceFileInputFormat.class);
+        job.setMapperClass(DblpCompositeCountMapper.class);
+        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(IntWritable.class);
+        job.setCombinerClass(IntSumReducer.class);
+        job.setReducerClass(IntSumReducer.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
+        job.setOutputFormatClass(SequenceFileOutputFormat.class);
 
         FileInputFormat.setInputPaths(job, inputFile);
         FileOutputFormat.setOutputPath(job, outputPath);
+
+        setOutputCompressionType(job, SequenceFile.CompressionType.BLOCK);
+        setOutputCompressorClass(job, DefaultCodec.class);
 
         if (job.waitForCompletion(true)) {
             return 0;
@@ -102,7 +115,11 @@ public class CompositeCount extends Configured implements Tool {
         static LinkedHashSet<String> getFieldPair(List<List<String>> fields) {
             return Arrays.stream(fields.get(0).toArray())
                     .flatMap(s1 -> Arrays.stream(fields.get(1).toArray())
-                            .map(s2 -> s1.toString() + "\t" + s2.toString()))
+                            .map(s2 -> {
+                                List<String> f = Arrays.asList(s1.toString(), s2.toString());
+                                return new HashSet<>(f).size() == 2 ? s1.toString() +
+                                        "\t" + s2.toString() : "";
+                            })).filter(s -> s.length() > 0)
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }
 
@@ -110,7 +127,12 @@ public class CompositeCount extends Configured implements Tool {
             return Arrays.stream(fields.get(0).toArray())
                     .flatMap(s1 -> Arrays.stream(fields.get(1).toArray())
                             .flatMap(s2 -> Arrays.stream(fields.get(2).toArray())
-                                    .map(s3 -> s1.toString() + s2.toString() + s3.toString())))
+                                    .map(s3 -> {
+                                        List<String> f = Arrays.asList(s1.toString(), s2.toString(), s3.toString());
+                                        return new HashSet<>(f).size() == 3 ? s1.toString() +
+                                                "\t" + s2.toString() +
+                                                "\t" + s3.toString() : "";
+                                    }))).filter(s -> s.length() > 0)
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }
 
@@ -147,9 +169,9 @@ public class CompositeCount extends Configured implements Tool {
                     }
                 }
             }
-            // System.out.println("FIELDS: " + fields);
 
             LinkedHashSet<String> compositeFields = getCompositeField(fields);
+            // System.out.println("FIELDS: " + fields);
             // System.out.println("COMPOSITEFIELDS: " + compositeFields);
 
             for (String compositeField : compositeFields) {
@@ -157,7 +179,6 @@ public class CompositeCount extends Configured implements Tool {
                 context.write(tag, ONE);
             }
             // TODO: Filter by fields
-            // TODO: Uniquely Combining field with itself, eg. authors, authors; authors, authors, authors
         }
 
         Method getMethod(PublicationWritable pw, String methodName) throws NoSuchMethodException {
