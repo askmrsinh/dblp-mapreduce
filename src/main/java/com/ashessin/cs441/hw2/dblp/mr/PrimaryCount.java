@@ -1,0 +1,114 @@
+package com.ashessin.cs441.hw2.dblp.mr;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.compress.DefaultCodec;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
+
+import java.io.IOException;
+import java.net.URI;
+
+import static org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.setOutputCompressorClass;
+import static org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat.setOutputCompressionType;
+
+public class PrimaryCount extends Configured implements Tool {
+    public static void main(String[] args) throws Exception {
+        long start = System.currentTimeMillis();
+        long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+
+        int res = ToolRunner.run(new Configuration(), new PrimaryCount(), args);
+
+        long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        long end = System.currentTimeMillis();
+
+        System.out.println("Primary Count MR, Memory used (bytes): "
+                + (memend - memstart));
+        System.out.println("Primary Count MR, Time taken (ms): "
+                + (end - start));
+
+        System.exit(res);
+    }
+
+    /**
+     * Execute the command with the given arguments.
+     *
+     * @param args command specific arguments.
+     * @return exit code.
+     * @throws Exception
+     */
+    @Override
+    public int run(String[] args) throws Exception {
+        Configuration conf = super.getConf();
+        conf.set("mapred.compress.map.output", "true");
+        conf.set("mapred.output.compression.type", "BLOCK");
+        conf.set("mapred.map.output.compression.codec", "org.apache.hadoop.io.compress.DefaultCodec");
+
+        final String HDFS = "hdfs://localhost:9000";
+        Path inputFile = new Path(new URI(HDFS + args[0]));
+        Path outputPath = new Path(new URI(HDFS + args[1]));
+
+        FileSystem hdfs = FileSystem.get(URI.create(HDFS), conf);
+        // delete existing hdfs target directory
+        if (hdfs.exists(outputPath)) {
+            hdfs.delete(outputPath, true);
+        }
+
+        Job job = Job.getInstance(conf, "Dblp Primary Count");
+        job.setJarByClass(PrimaryCount.class);
+        job.setInputFormatClass(SequenceFileInputFormat.class);
+        job.setMapperClass(DblpPrimaryCountMapper.class);
+        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(IntWritable.class);
+        job.setCombinerClass(IntSumReducer.class);
+        job.setReducerClass(IntSumReducer.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+        job.setOutputFormatClass(SequenceFileOutputFormat.class);
+
+        FileInputFormat.setInputPaths(job, inputFile);
+        FileOutputFormat.setOutputPath(job, outputPath);
+
+        setOutputCompressionType(job, SequenceFile.CompressionType.BLOCK);
+        setOutputCompressorClass(job, DefaultCodec.class);
+
+        if (job.waitForCompletion(true)) {
+            return 0;
+        }
+        return 1;
+    }
+
+    public static class DblpPrimaryCountMapper extends Mapper<Text, IntWritable, Text, IntWritable> {
+
+        private static final IntWritable ONE = new IntWritable(1);
+        private Text tag = new Text();
+
+        /**
+         * Called once for each key/value pair in the input split.
+         *
+         * @param k
+         * @param v
+         * @param context
+         */
+        @Override
+        protected void map(Text k, IntWritable v, Context context) throws IOException, InterruptedException {
+            String primaryKey = k.toString().split("\t")[0];
+            if (primaryKey.length() > 0) {
+                tag.set(primaryKey);
+                context.write(tag, ONE);
+            }
+        }
+    }
+}
