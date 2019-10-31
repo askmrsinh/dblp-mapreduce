@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.setOutputCompressorClass;
-import static org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat.*;
+import static org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat.setOutputCompressionType;
 
 public class CompositeCount extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
@@ -64,6 +64,7 @@ public class CompositeCount extends Configured implements Tool {
         final String HDFS = "hdfs://localhost:9000";
         Path inputFile = new Path(new URI(HDFS + args[0]));
         Path outputPath = new Path(new URI(HDFS + args[1]));
+
         DblpCompositeCountMapper.setRequiredFields(args[2]);
 
         FileSystem hdfs = FileSystem.get(URI.create(HDFS), conf);
@@ -110,21 +111,17 @@ public class CompositeCount extends Configured implements Tool {
             requiredFields = fieldKeys.toLowerCase().split(",");
         }
 
-        static boolean getRequiredFieldType(String fieldKey) {
-            return !fieldKey.matches("authors|editors|urls|ees|cites|schools");
-        }
-
-        static LinkedHashSet<String> getCompositeField(List<List<String>> fields) {
+        static LinkedHashSet<String> getCompositeField(ArrayList<ArrayList<String>> fields) {
             if (requiredFields.length == 2) {
                 return getFieldPair(fields);
             }
             if (requiredFields.length == 3) {
                 return getFieldTriplet(fields);
             }
-            return (LinkedHashSet<String>) fields.get(0);
+            return new LinkedHashSet<>(fields.get(0));
         }
 
-        static LinkedHashSet<String> getFieldPair(List<List<String>> fields) {
+        static LinkedHashSet<String> getFieldPair(ArrayList<ArrayList<String>> fields) {
             return Arrays.stream(fields.get(0).toArray())
                     .flatMap(s1 -> Arrays.stream(fields.get(1).toArray())
                             .map(s2 -> {
@@ -135,7 +132,7 @@ public class CompositeCount extends Configured implements Tool {
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }
 
-        static LinkedHashSet<String> getFieldTriplet(List<List<String>> fields) {
+        static LinkedHashSet<String> getFieldTriplet(ArrayList<ArrayList<String>> fields) {
             return Arrays.stream(fields.get(0).toArray())
                     .flatMap(s1 -> Arrays.stream(fields.get(1).toArray())
                             .flatMap(s2 -> Arrays.stream(fields.get(2).toArray())
@@ -157,33 +154,28 @@ public class CompositeCount extends Configured implements Tool {
          */
         @Override
         protected void map(Text key, PublicationWritable publication, Context context) throws IOException, InterruptedException {
-            List<List<String>> fields = new ArrayList<>(3);
+            ArrayList<ArrayList<String>> listOLists = new ArrayList<>(3);
 
             // Do not allow combining more than 3 fields
             for (int i = 0; i < requiredFields.length && i < 3; i++) {
                 String requiredField = requiredFields[i];
                 String methodName = "get" + requiredField.substring(0, 1).toUpperCase() + requiredField.substring(1);
-                if (getRequiredFieldType(requiredField)) {
-                    try {
-                        String keyString = String.valueOf(getMethod(publication, methodName).invoke(publication));
-                        keyString = keyString.isEmpty() ? "" : keyString;
-                        fields.add(i, Collections.singletonList(keyString));
-                    } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                        e.printStackTrace();
+                try {
+                    ArrayList<String> singleList = new ArrayList<>(1);
+                    Object obj = getMethod(publication, methodName).invoke(publication);
+                    if (getMethodType(publication, methodName) == List.class) {
+                        singleList.addAll((List) obj);
+                    } else {
+                        singleList.add(getMethod(publication, methodName).invoke(publication).toString());
                     }
-                } else {
-                    try {
-                        List<String> keyStrings = (List<String>) getMethod(publication, methodName).invoke(publication);
-                        keyStrings = keyStrings.isEmpty() ? Collections.singletonList("") : keyStrings;
-                        fields.add(i, keyStrings);
-                    } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                        e.printStackTrace();
-                    }
+                    listOLists.add(i, singleList);
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
                 }
             }
 
-            LinkedHashSet<String> compositeFields = getCompositeField(fields);
-            // System.out.println("FIELDS: " + fields);
+            LinkedHashSet<String> compositeFields = getCompositeField(listOLists);
+            // System.out.println("FIELDS: " + listOLists);
             // System.out.println("COMPOSITEFIELDS: " + compositeFields);
 
             for (String compositeField : compositeFields) {
@@ -195,6 +187,10 @@ public class CompositeCount extends Configured implements Tool {
 
         Method getMethod(PublicationWritable pw, String methodName) throws NoSuchMethodException {
             return pw.getClass().getMethod(methodName);
+        }
+
+        Class<?> getMethodType(PublicationWritable pw, String methodName) throws NoSuchMethodException {
+            return pw.getClass().getMethod(methodName).getReturnType();
         }
     }
 }
