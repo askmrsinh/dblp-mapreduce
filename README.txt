@@ -1,7 +1,7 @@
 
 
 
-Extracting data from dblp F.A.Q: 
+Extracting data from dblp F.A.Q:
     How can I download the whole dblp dataset?
         https://dblp.org/faq/1474679.html
     What do I find in dblp.xml?
@@ -14,8 +14,16 @@ Extracting data from dblp F.A.Q:
 The dblp.xml is a simple, plain ASCII XML file, using the named entities as given in the accompanying dblp.dtd file.
 A daily updated (but unversioned) XML dump can be found on the dblp web server: 
     https://dblp.org/xml/
-	    dblp.xml.gz		is a compressed (gzip) version of an XML file which contains all bibliographic records
-        dblp.dtd 		is	the document type definition you need to validate the XML file
+	    dblp.xml.gz		compressed (gzip) version of an XML file which contains all bibliographic records
+        dblp.dtd 		the Document Type Definition (DTD) required to validate the XML file
 
 Furthermore, each month, a persistent snapshot release is archived:
-    http://dblp.org/xml/release/
+    https://dblp.org/xml/release/
+
+More information on the XML structure of the dblp records and several design decisions can be found in the following paper:
+    https://dblp.uni-trier.de/xml/docu/dblpxml.pdf
+
+
+hw2/src/main/resources/bin
+    dtd2xsd.pl        perl script to convert Document Type Definition (DTD) to XML Schema Definition (XSD)
+    inspectdblp.sh    bash script to extract count for each bibliographic record and other elements in the XML
