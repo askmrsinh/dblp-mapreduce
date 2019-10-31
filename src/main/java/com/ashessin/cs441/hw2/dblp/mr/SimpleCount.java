@@ -25,7 +25,19 @@ import java.util.List;
 
 public class SimpleCount extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
+        long start = System.currentTimeMillis();
+        long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+
         int res = ToolRunner.run(new Configuration(), new SimpleCount(), args);
+
+        long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        long end = System.currentTimeMillis();
+
+        System.out.println("Simple Count MR, Memory used (bytes): "
+                + (memend - memstart));
+        System.out.println("Simple Count MR, Time taken (ms): "
+                + (end - start));
+
         System.exit(res);
     }
 
