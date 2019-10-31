@@ -29,7 +29,6 @@ public class PublicationsSequenceFileWriter extends Configured implements Tool {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
-        System.setProperty("entityExpansionLimit", String.valueOf(Integer.MAX_VALUE));
         int res = ToolRunner.run(new Configuration(), new PublicationsSequenceFileWriter(), args);
 
         long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
@@ -81,6 +80,7 @@ public class PublicationsSequenceFileWriter extends Configured implements Tool {
         String crossref = "";
         ArrayList<String> schools = null;
 
+        System.setProperty("entityExpansionLimit", String.valueOf(Integer.MAX_VALUE));
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
         // disable resolving of external DTD entities
         xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
