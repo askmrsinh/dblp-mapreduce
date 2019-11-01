@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE dblp SYSTEM "dblp.dtd">
+<dblp>
+	<article mdate="2018-01-07" key="tr/meltdown/s18" publtype="informal">
+		<author>Paul Kocher</author>
+		<author>Daniel Genkin</author>
+		<author>Daniel Gruss</author>
+		<author>Werner Haas</author>
+		<author>Mike Hamburg</author>
+		<author>Moritz Lipp</author>
+		<author>Stefan Mangard</author>
+		<author>Thomas Prescher 0002</author>
+		<author>Michael Schwarz 0001</author>
+		<author>Yuval Yarom</author>
+		<title>Spectre Attacks: Exploiting Speculative Execution.</title>
+		<journal>meltdownattack.com</journal>
+		<year>2018</year>
+		<ee>https://spectreattack.com/spectre.pdf</ee>
+	</article>
+	<article mdate="2018-01-07" key="tr/meltdown/m18" publtype="informal">
+		<author>Moritz Lipp</author>
+		<author>Michael Schwarz 0001</author>
+		<author>Daniel Gruss</author>
+		<author>Thomas Prescher 0002</author>
+		<author>Werner Haas</author>
+		<author>Stefan Mangard</author>
+		<author>Paul Kocher</author>
+		<author>Daniel Genkin</author>
+		<author>Yuval Yarom</author>
+		<author>Mike Hamburg</author>
+		<title>Meltdown</title>
+		<journal>meltdownattack.com</journal>
+		<ee>https://meltdownattack.com/meltdown.pdf</ee>
+		<year>2018</year>
+	</article>
+	<book mdate="2019-05-27" key="tr/acm/CS2013">
+		<title>Computer Science Curricula 2013</title>
+		<publisher>ACM Press and IEEE Computer Society Press</publisher>
+		<year>2013</year>
+		<ee>https://doi.org/10.1145/2534860</ee>
+		<isbn>978-1-4503-2309-3</isbn>
+	</book>
+	<phdthesis mdate="2002-01-03" key="phd/Phipps92">
+		<author>Geoffrey Phipps</author>
+		<title>Glue: A Deductive Database Programming Language</title>
+		<year>1992</year>
+		<school>Stanford University, Department of Computer Science</school>
+	</phdthesis>
+	<phdthesis mdate="2004-07-06" key="phd/Breuer2000">
+		<author>Lothar Breuer</author>
+		<title>Spatial Queues.</title>
+		<year>2000</year>
+		<school>Univ. Trier, FB 4, Informatik</school>
+		<ee>http://ubt.opus.hbz-nrw.de/volltexte/2004/119/</ee>
+	</phdthesis>
+	<phdthesis mdate="2019-04-12" key="phd/Hofmann1999">
+		<author>Jens Hofmann 0001</author>
+		<title>The BMAP/G/1 queue with level dependent arrivals: An extended queueing model for stations with nonrenewal and state dependent input traffic.</title>
+		<year>1999</year>
+		<pages>1-95</pages>
+		<school>University of Trier, FB 4 Informatik, Germany</school>
+		<ee>http://ubt.opus.hbz-nrw.de/volltexte/2004/148/</ee>
+		<ee>http://d-nb.info/957663463</ee>
+	</phdthesis>
+	<phdthesis mdate="2002-01-03" key="phd/Ordille93">
+		<author>Joann J. Ordille</author>
+		<title>Descriptive Name Services for Large Internets.</title>
+		<year>1993</year>
+		<school>Univ. of Wisconsin-Madison</school>
+	</phdthesis>
+	<phdthesis mdate="2013-04-08" key="phd/Beferull-Lozano02">
+		<author>Baltasar Beferull-Lozano</author>
+		<title>Quantization Design for Structured Overcomplete Expansions.</title>
+		<year>2002</year>
+		<school>University of Southern California</school>
+		<ee>http://www.uv.es/%7Ebalbelo/thesis_BBL.pdf</ee>
+	</phdthesis>
+	<phdthesis mdate="2016-11-18" key="phd/Smolka89">
+		<author>Gert Smolka</author>
+		<title>Logic Programming over Polymorphically Order-Sorted Types.</title>
+		<year>1989</year>
+		<pages>1-222</pages>
+		<school>Kaiserslautern University of Technology, Germany</school>
+		<ee>http://d-nb.info/891234179</ee>
+	</phdthesis>
+	<phdthesis mdate="2006-06-28" key="phd/Dobry87">
+		<author>Tep P. Dobry</author>
+		<title>A High Performance Architecture For Prolog</title>
+		<year>1987</year>
+		<school>University of California at Berkeley</school>
+	</phdthesis>
+	<phdthesis mdate="2017-04-25" key="phd/Ghemawat95">
+		<author>Sanjay Ghemawat</author>
+		<title>The Modified Object Buffer: A Storage Management Technique for Object-Oriented Databases</title>
+		<year>1995</year>
+		<school>MIT Laboratory for Computer Science, Cambridge, MA, USA</school>
+		<ee>http://hdl.handle.net/1721.1/37012</ee>
+	</phdthesis>
+	<phdthesis mdate="2016-12-22" key="phd/Rothkugel2002">
+		<author>Steffen Rothkugel</author>
+		<title>Towards Middleware Support for Mobile and Cellular Networks: core problems and illustrated approaches.</title>
+		<year>2002</year>
+		<school>Univ. Trier, FB 4, Informatik</school>
+		<ee>http://ubt.opus.hbz-nrw.de/volltexte/2004/210/</ee>
+		<ee>http://nbn-resolving.de/urn:nbn:de:hbz:385-2109</ee>
+		<ee>http://d-nb.info/971737843</ee>
+	</phdthesis>
+	<phdthesis mdate="2016-05-04" key="phd/sk/Frisch2009">
+		<author>Guido Frisch</author>
+		<title>Using open source software to develop E-business applications for medium- and small-sized enterprises.</title>
+		<year>2009</year>
+		<school>Bratislava, Univ.</school>
+		<pages>1-151</pages>
+		<isbn>978-3-8300-4753-7</isbn>
+		<ee>http://d-nb.info/996716548</ee>
+	</phdthesis>
+</dblp>
