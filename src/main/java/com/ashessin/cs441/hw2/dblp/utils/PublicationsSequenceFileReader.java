@@ -10,6 +10,9 @@ import org.apache.hadoop.util.ToolRunner;
 
 import java.net.URI;
 
+/**
+ * DBLP Publications sequence file reader.
+ */
 public class PublicationsSequenceFileReader extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
@@ -33,7 +36,7 @@ public class PublicationsSequenceFileReader extends Configured implements Tool {
      *
      * @param args command specific arguments.
      * @return exit code.
-     * @throws Exception
+     * @throws Exception in case of errors
      */
     @Override
     public int run(String[] args) throws Exception {

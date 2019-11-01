@@ -24,6 +24,9 @@ import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.ArrayList;
 
+/**
+ * DBLP Publications sequence file writer.
+ */
 public class PublicationsSequenceFileWriter extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
@@ -59,7 +62,7 @@ public class PublicationsSequenceFileWriter extends Configured implements Tool {
      *
      * @param args command specific arguments.
      * @return exit code.
-     * @throws Exception
+     * @throws Exception in case of errors
      */
     @Override
     public int run(String[] args) throws Exception {

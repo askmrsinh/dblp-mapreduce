@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * DBLP Publication WritableComparable class.
+ */
 public class PublicationWritable implements WritableComparable<PublicationWritable> {
     private String key;
     private String publrecord;
@@ -29,13 +32,17 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
     PublicationWritable() {
     }
 
-    PublicationWritable(String key, String publrecord, @Nullable String publtype, @Nullable ArrayList<String> authors, int year, @Nullable String journal) {
+    PublicationWritable(String key, String publrecord, @Nullable String publtype, @Nullable ArrayList<String> authors,
+                        int year, @Nullable String journal) {
         this.key = key;
         this.publrecord = publrecord;
         this.publtype = publtype;
     }
 
-    public PublicationWritable(String key, String publrecord, String publtype, List<String> authors, List<String> editors, int year, String journal, List<String> urls, List<String> ees, List<String> cites, String crossref, List<String> schools) {
+    public PublicationWritable(String key, String publrecord, @Nullable String publtype, @Nullable List<String> authors,
+                               @Nullable List<String> editors, @Nullable int year, @Nullable String journal,
+                               @Nullable List<String> urls, @Nullable List<String> ees, @Nullable List<String> cites,
+                               @Nullable String crossref, @Nullable List<String> schools) {
         this.key = key;
         this.publrecord = publrecord;
         this.publtype = publtype;
@@ -163,7 +170,7 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
      * Serialize the fields of this object to <code>out</code>.
      *
      * @param out <code>DataOuput</code> to serialize this object into.
-     * @throws IOException
+     * @throws IOException in case of input/output errors
      */
     @Override
     public void write(DataOutput out) throws IOException {
@@ -188,7 +195,7 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
      * existing object where possible.</p>
      *
      * @param in <code>DataInput</code> to deseriablize this object from.
-     * @throws IOException
+     * @throws IOException in case of input/output errors
      */
     @Override
     public void readFields(DataInput in) throws IOException {

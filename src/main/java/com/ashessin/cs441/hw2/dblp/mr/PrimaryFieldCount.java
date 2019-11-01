@@ -24,12 +24,15 @@ import java.net.URI;
 import static org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.setOutputCompressorClass;
 import static org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat.setOutputCompressionType;
 
-public class PrimaryCount extends Configured implements Tool {
+/**
+ * Counts the first field value in a field value set.
+ */
+public class PrimaryFieldCount extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
-        int res = ToolRunner.run(new Configuration(), new PrimaryCount(), args);
+        int res = ToolRunner.run(new Configuration(), new PrimaryFieldCount(), args);
 
         long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long end = System.currentTimeMillis();
@@ -47,7 +50,7 @@ public class PrimaryCount extends Configured implements Tool {
      *
      * @param args command specific arguments.
      * @return exit code.
-     * @throws Exception
+     * @throws Exception in case of errors
      */
     @Override
     public int run(String[] args) throws Exception {
@@ -67,9 +70,9 @@ public class PrimaryCount extends Configured implements Tool {
         }
 
         Job job = Job.getInstance(conf, "Dblp Primary Count");
-        job.setJarByClass(PrimaryCount.class);
+        job.setJarByClass(PrimaryFieldCount.class);
         job.setInputFormatClass(SequenceFileInputFormat.class);
-        job.setMapperClass(DblpPrimaryCountMapper.class);
+        job.setMapperClass(DblpPrimaryFieldCountMapper.class);
         job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(IntWritable.class);
         job.setCombinerClass(IntSumReducer.class);
@@ -90,24 +93,24 @@ public class PrimaryCount extends Configured implements Tool {
         return 1;
     }
 
-    public static class DblpPrimaryCountMapper extends Mapper<Text, IntWritable, Text, IntWritable> {
+    public static class DblpPrimaryFieldCountMapper extends Mapper<Text, IntWritable, Text, IntWritable> {
 
         private static final IntWritable ONE = new IntWritable(1);
-        private Text tag = new Text();
+        private Text result = new Text();
 
         /**
          * Called once for each key/value pair in the input split.
          *
-         * @param k
-         * @param v
-         * @param context
+         * @param field1  the first field value in a tab separated field value string
+         * @param count   the count for joined field value string
+         * @param context generate an output result/1 pair
          */
         @Override
-        protected void map(Text k, IntWritable v, Context context) throws IOException, InterruptedException {
-            String primaryKey = k.toString().split("\t")[0];
+        protected void map(Text field1, IntWritable count, Context context) throws IOException, InterruptedException {
+            String primaryKey = field1.toString().split("\t")[0];
             if (primaryKey.length() > 0) {
-                tag.set(primaryKey);
-                context.write(tag, ONE);
+                result.set(primaryKey);
+                context.write(result, ONE);
             }
         }
     }

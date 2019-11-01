@@ -25,12 +25,15 @@ import java.net.URI;
 import static org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.setCompressOutput;
 import static org.apache.hadoop.mapreduce.lib.output.TextOutputFormat.setOutputCompressorClass;
 
-public class SwapKeyVal extends Configured implements Tool {
+/**
+ * Swaps Key/Value pairs and then sorts in descending order by the new Key.
+ */
+public class SwapSortKeyValuePairs extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
-        int res = ToolRunner.run(new Configuration(), new SwapKeyVal(), args);
+        int res = ToolRunner.run(new Configuration(), new SwapSortKeyValuePairs(), args);
 
         long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long end = System.currentTimeMillis();
@@ -48,7 +51,7 @@ public class SwapKeyVal extends Configured implements Tool {
      *
      * @param args command specific arguments.
      * @return exit code.
-     * @throws Exception
+     * @throws Exception in case of some error
      */
     @Override
     public int run(String[] args) throws Exception {
@@ -68,9 +71,9 @@ public class SwapKeyVal extends Configured implements Tool {
         }
 
         Job job = Job.getInstance(conf, "Swap Key Value pairs");
-        job.setJarByClass(SwapKeyVal.class);
+        job.setJarByClass(SwapSortKeyValuePairs.class);
         job.setInputFormatClass(SequenceFileInputFormat.class);
-        job.setMapperClass(DblpkInversMapper.class);
+        job.setMapperClass(DblpkSwapSortKeyValuePairsMapper.class);
         job.setMapOutputKeyClass(IntWritable.class);
         job.setMapOutputValueClass(Text.class);
         job.setCombinerClass(Reducer.class);
@@ -94,23 +97,30 @@ public class SwapKeyVal extends Configured implements Tool {
         return 1;
     }
 
-    public static class DblpkInversMapper extends Mapper<Text, IntWritable, IntWritable, Text> {
+    /**
+     * Mapper class to Swaps Key/Value pairs and write to HDFS
+     */
+    public static class DblpkSwapSortKeyValuePairsMapper extends Mapper<Text, IntWritable, IntWritable, Text> {
 
         /**
          * Called once for each key/value pair in the input split.
          *
-         * @param k
-         * @param v
-         * @param context
+         * @param property set of tab separated {@link com.ashessin.cs441.hw2.dblp.utils.PublicationWritable} field(s)
+         *                 for a given DBLP publication record
+         * @param count    some number for the given property, ie. set of field(s)
+         * @param context  generate an output count/property pair
          */
         @Override
-        protected void map(Text k, IntWritable v, Context context) throws IOException, InterruptedException {
-            // System.out.println("K: " + k);
-            // System.out.println("V: " + v);
-            context.write(v, k);
+        protected void map(Text property, IntWritable count, Context context) throws IOException, InterruptedException {
+            // System.out.println("K: " + property);
+            // System.out.println("V: " + count);
+            context.write(count, property);
         }
     }
 
+    /**
+     * A custom comparator to sort based on the integer value of a key in descending order.
+     */
     public static class SortIntegerComparator extends WritableComparator {
 
         protected SortIntegerComparator() {
@@ -120,18 +130,18 @@ public class SwapKeyVal extends Configured implements Tool {
         /**
          * Compare two WritableComparables.
          *
-         * <p> The default implementation uses the natural ordering, calling {@link
+         * <p> This implementation uses the numerical ordering, calling {@link
          * Comparable#compareTo(Object)}.
          *
-         * @param a
-         * @param b
+         * @param count1 count for property of DBLP publication record A
+         * @param count2 count for property of DBLP publication record B
          */
         @Override
-        public int compare(WritableComparable a, WritableComparable b) {
-            IntWritable k1 = (IntWritable) a;
-            IntWritable k2 = (IntWritable) b;
+        public int compare(WritableComparable count1, WritableComparable count2) {
+            IntWritable c1 = (IntWritable) count1;
+            IntWritable c2 = (IntWritable) count2;
 
-            return -1 * k1.compareTo(k2);
+            return -1 * c1.compareTo(c2);
         }
     }
 }

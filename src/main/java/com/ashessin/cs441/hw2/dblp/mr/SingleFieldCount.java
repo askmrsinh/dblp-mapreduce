@@ -23,12 +23,15 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.List;
 
-public class SimpleCount extends Configured implements Tool {
+/**
+ * Counts all values of a single field in DBLP records.
+ */
+public class SingleFieldCount extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
-        int res = ToolRunner.run(new Configuration(), new SimpleCount(), args);
+        int res = ToolRunner.run(new Configuration(), new SingleFieldCount(), args);
 
         long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long end = System.currentTimeMillis();
@@ -46,7 +49,7 @@ public class SimpleCount extends Configured implements Tool {
      *
      * @param args command specific arguments.
      * @return exit code.
-     * @throws Exception
+     * @throws Exception if something goes wrong
      */
     @Override
     public int run(String[] args) throws Exception {
@@ -58,7 +61,7 @@ public class SimpleCount extends Configured implements Tool {
         final String HDFS = "hdfs://localhost:9000";
         Path inputFile = new Path(new URI(HDFS + args[0]));
         Path outputPath = new Path(new URI(HDFS + args[1]));
-        DblpSimpleCountMapper.setRequiredField(args[2].toLowerCase());
+        DblpSingleFieldCountMapper.setRequiredField(args[2].toLowerCase());
 
         FileSystem hdfs = FileSystem.get(URI.create(HDFS), conf);
         // delete existing hdfs target directory
@@ -67,9 +70,9 @@ public class SimpleCount extends Configured implements Tool {
         }
 
         Job job = Job.getInstance(conf, "Dblp Simple Count");
-        job.setJarByClass(SimpleCount.class);
+        job.setJarByClass(SingleFieldCount.class);
         job.setInputFormatClass(SequenceFileInputFormat.class);
-        job.setMapperClass(DblpSimpleCountMapper.class);
+        job.setMapperClass(DblpSingleFieldCountMapper.class);
         job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(IntWritable.class);
         job.setCombinerClass(IntSumReducer.class);
@@ -87,11 +90,14 @@ public class SimpleCount extends Configured implements Tool {
         return 1;
     }
 
-    public static class DblpSimpleCountMapper extends Mapper<Text, PublicationWritable, Text, IntWritable> {
+    /**
+     * Mapper class to generate unit count against each value for a given field of a DBLP record.
+     */
+    public static class DblpSingleFieldCountMapper extends Mapper<Text, PublicationWritable, Text, IntWritable> {
 
         private static final IntWritable ONE = new IntWritable(1);
         private static String requiredField;
-        private Text tag = new Text();
+        private Text result = new Text();
 
         static void setRequiredField(String fieldKey) {
             requiredField = fieldKey;
@@ -104,27 +110,28 @@ public class SimpleCount extends Configured implements Tool {
         /**
          * Called once for each key/value pair in the input split.
          *
-         * @param key
-         * @param publication
-         * @param context
+         * @param key         the unique key field for a given DBLP publication record
+         * @param publication a single DBLP publication record object {@link PublicationWritable}
+         * @param context     generate an output result/1 pair
          */
         @Override
-        protected void map(Text key, PublicationWritable publication, Context context) throws IOException, InterruptedException {
+        protected void map(Text key, PublicationWritable publication, Context context)
+                throws IOException, InterruptedException {
             String methodName = "get" + requiredField.substring(0, 1).toUpperCase() + requiredField.substring(1);
             if (getRequiredFieldType(requiredField)) {
                 try {
-                    String keyString = String.valueOf(getMethod(publication, methodName).invoke(publication));
-                    tag.set(new Text(keyString));
-                    context.write(tag, ONE);
+                    String keyString = String.valueOf(getMethod(methodName).invoke(publication));
+                    result.set(new Text(keyString));
+                    context.write(result, ONE);
                 } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                     e.printStackTrace();
                 }
             } else {
                 try {
-                    List<String> keyStrings = (List<String>) getMethod(publication, methodName).invoke(publication);
+                    List<String> keyStrings = (List<String>) getMethod(methodName).invoke(publication);
                     for (String keyString : keyStrings) {
-                        tag.set(new Text(keyString));
-                        context.write(tag, ONE);
+                        result.set(new Text(keyString));
+                        context.write(result, ONE);
                     }
                 } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                     e.printStackTrace();
@@ -133,8 +140,15 @@ public class SimpleCount extends Configured implements Tool {
 
         }
 
-        Method getMethod(PublicationWritable pw, String methodName) throws NoSuchMethodException {
-            return pw.getClass().getMethod(methodName);
+        /**
+         * Uses Java Reflection to gain access to a method in {@link PublicationWritable} class.
+         *
+         * @param methodName the suffix in a getter method name
+         * @return provides access to a getter method from {@link PublicationWritable}
+         * @throws NoSuchMethodException if the getter method does not exists
+         */
+        Method getMethod(String methodName) throws NoSuchMethodException {
+            return PublicationWritable.class.getMethod(methodName);
         }
     }
 }

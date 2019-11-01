@@ -29,12 +29,15 @@ import java.util.stream.Collectors;
 import static org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.setOutputCompressorClass;
 import static org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat.setOutputCompressionType;
 
-public class CompositeCount extends Configured implements Tool {
+/**
+ * Counts all values across multiple fields in DBLP records.
+ */
+public class JoinedFieldsCount extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
-        int res = ToolRunner.run(new Configuration(), new CompositeCount(), args);
+        int res = ToolRunner.run(new Configuration(), new JoinedFieldsCount(), args);
 
         long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long end = System.currentTimeMillis();
@@ -52,7 +55,7 @@ public class CompositeCount extends Configured implements Tool {
      *
      * @param args command specific arguments.
      * @return exit code.
-     * @throws Exception
+     * @throws Exception in case of errors
      */
     @Override
     public int run(String[] args) throws Exception {
@@ -65,7 +68,7 @@ public class CompositeCount extends Configured implements Tool {
         Path inputFile = new Path(new URI(HDFS + args[0]));
         Path outputPath = new Path(new URI(HDFS + args[1]));
 
-        DblpCompositeCountMapper.setRequiredFields(args[2]);
+        DblpJoinedFieldsCountMapper.setRequiredFields(args[2]);
 
         FileSystem hdfs = FileSystem.get(URI.create(HDFS), conf);
         // delete existing directory
@@ -74,9 +77,9 @@ public class CompositeCount extends Configured implements Tool {
         }
 
         Job job = Job.getInstance(conf, "Dblp Composite Count");
-        job.setJarByClass(CompositeCount.class);
+        job.setJarByClass(JoinedFieldsCount.class);
         job.setInputFormatClass(SequenceFileInputFormat.class);
-        job.setMapperClass(DblpCompositeCountMapper.class);
+        job.setMapperClass(DblpJoinedFieldsCountMapper.class);
         job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(IntWritable.class);
         job.setCombinerClass(IntSumReducer.class);
@@ -97,15 +100,11 @@ public class CompositeCount extends Configured implements Tool {
         return 1;
     }
 
-    public static class DblpCompositeCountMapper extends Mapper<Text, PublicationWritable, Text, IntWritable> {
+    public static class DblpJoinedFieldsCountMapper extends Mapper<Text, PublicationWritable, Text, IntWritable> {
 
         private static final IntWritable ONE = new IntWritable(1);
         private static String[] requiredFields;
         private Text tag = new Text();
-
-        static String[] getRequiredFields() {
-            return requiredFields;
-        }
 
         static void setRequiredFields(String fieldKeys) {
             requiredFields = fieldKeys.toLowerCase().split(",");
@@ -121,6 +120,12 @@ public class CompositeCount extends Configured implements Tool {
             return new LinkedHashSet<>(fields.get(0));
         }
 
+        /**
+         * Computes the Cartesian product of lists pairs of values.
+         *
+         * @param fields List of maximum two Lists, each containing values for a given field of a DBLP record
+         * @return cartesian product of values across the two nested lists
+         */
         static LinkedHashSet<String> getFieldPair(ArrayList<ArrayList<String>> fields) {
             return Arrays.stream(fields.get(0).toArray())
                     .flatMap(s1 -> Arrays.stream(fields.get(1).toArray())
@@ -132,6 +137,12 @@ public class CompositeCount extends Configured implements Tool {
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }
 
+        /**
+         * Computes the Cartesian product of lists triplets of values.
+         *
+         * @param fields List of maximum three Lists, each containing values for a given field of a DBLP record
+         * @return cartesian product of values across the three nested lists
+         */
         static LinkedHashSet<String> getFieldTriplet(ArrayList<ArrayList<String>> fields) {
             return Arrays.stream(fields.get(0).toArray())
                     .flatMap(s1 -> Arrays.stream(fields.get(1).toArray())
@@ -148,12 +159,13 @@ public class CompositeCount extends Configured implements Tool {
         /**
          * Called once for each key/value pair in the input split.
          *
-         * @param key
-         * @param publication
-         * @param context
+         * @param key         the unique key field for a given DBLP publication record
+         * @param publication a single DBLP publication record object {@link PublicationWritable}
+         * @param context     generate an output result/1 pair
          */
         @Override
-        protected void map(Text key, PublicationWritable publication, Context context) throws IOException, InterruptedException {
+        protected void map(Text key, PublicationWritable publication, Context context)
+                throws IOException, InterruptedException {
             ArrayList<ArrayList<String>> listOLists = new ArrayList<>(3);
 
             // Do not allow combining more than 3 fields
@@ -162,11 +174,11 @@ public class CompositeCount extends Configured implements Tool {
                 String methodName = "get" + requiredField.substring(0, 1).toUpperCase() + requiredField.substring(1);
                 try {
                     ArrayList<String> singleList = new ArrayList<>(1);
-                    Object obj = getMethod(publication, methodName).invoke(publication);
-                    if (getMethodType(publication, methodName) == List.class) {
+                    Object obj = getMethod(methodName).invoke(publication);
+                    if (getMethodType(methodName) == List.class) {
                         singleList.addAll((List) obj);
                     } else {
-                        singleList.add(getMethod(publication, methodName).invoke(publication).toString());
+                        singleList.add(getMethod(methodName).invoke(publication).toString());
                     }
                     listOLists.add(i, singleList);
                 } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -185,12 +197,27 @@ public class CompositeCount extends Configured implements Tool {
             // TODO: Filter by fields
         }
 
-        Method getMethod(PublicationWritable pw, String methodName) throws NoSuchMethodException {
-            return pw.getClass().getMethod(methodName);
+        /**
+         * Uses Java Reflection to gain method access in {@link PublicationWritable} class.
+         *
+         * @param methodName the suffix in a getter method name
+         * @return provides access to a getter method from {@link PublicationWritable}
+         * @throws NoSuchMethodException if the getter method does not exists
+         */
+        Method getMethod(String methodName) throws NoSuchMethodException {
+            return PublicationWritable.class.getMethod(methodName);
         }
 
-        Class<?> getMethodType(PublicationWritable pw, String methodName) throws NoSuchMethodException {
-            return pw.getClass().getMethod(methodName).getReturnType();
+
+        /**
+         * Uses Java Reflection to return class of method return type in {@link PublicationWritable} class.
+         *
+         * @param methodName the suffix in a getter method name
+         * @return provides class for getter method return type from {@link PublicationWritable}
+         * @throws NoSuchMethodException if the getter method does not exists
+         */
+        Class<?> getMethodType(String methodName) throws NoSuchMethodException {
+            return PublicationWritable.class.getMethod(methodName).getReturnType();
         }
     }
 }
