@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * Counts all values of a single field in DBLP records.
  */
-public class SingleFieldCount extends Configured implements Tool {
+public final class SingleFieldCount extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();

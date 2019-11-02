@@ -28,7 +28,7 @@ import static org.apache.hadoop.mapreduce.lib.output.TextOutputFormat.setOutputC
 /**
  * Swaps Key/Value pairs and then sorts in descending order by the new Key.
  */
-public class SwapSortKeyValuePairs extends Configured implements Tool {
+public final class SwapSortKeyValuePairs extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();

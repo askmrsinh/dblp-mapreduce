@@ -27,7 +27,7 @@ import static org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat.se
 /**
  * Counts the first field value in a field value set.
  */
-public class PrimaryFieldCount extends Configured implements Tool {
+public final class PrimaryFieldCount extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();

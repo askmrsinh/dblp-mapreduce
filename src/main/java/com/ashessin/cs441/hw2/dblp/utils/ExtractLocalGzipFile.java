@@ -6,7 +6,7 @@ import java.util.zip.GZIPInputStream;
 /**
  * Extracts a Gzip file on local filesystem.
  */
-public class ExtractLocalGzipFile {
+public final class ExtractLocalGzipFile {
     private InputStream in;
 
     public ExtractLocalGzipFile(File f) throws IOException {

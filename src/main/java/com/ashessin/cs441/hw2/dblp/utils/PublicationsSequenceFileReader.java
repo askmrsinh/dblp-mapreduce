@@ -13,7 +13,7 @@ import java.net.URI;
 /**
  * DBLP Publications sequence file reader.
  */
-public class PublicationsSequenceFileReader extends Configured implements Tool {
+public final class PublicationsSequenceFileReader extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();

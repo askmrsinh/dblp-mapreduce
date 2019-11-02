@@ -27,7 +27,7 @@ import java.util.ArrayList;
 /**
  * DBLP Publications sequence file writer.
  */
-public class PublicationsSequenceFileWriter extends Configured implements Tool {
+public final class PublicationsSequenceFileWriter extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();

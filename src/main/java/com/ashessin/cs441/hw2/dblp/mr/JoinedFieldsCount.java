@@ -32,7 +32,7 @@ import static org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat.se
 /**
  * Counts all values across multiple fields in DBLP records.
  */
-public class JoinedFieldsCount extends Configured implements Tool {
+public final class JoinedFieldsCount extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
