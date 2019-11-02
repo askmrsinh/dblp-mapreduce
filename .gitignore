@@ -261,3 +261,4 @@ project/plugins/project/
 /src/main/resources/dblp-test.xml
 /src/main/resources/dblp.xml
 *.log.[0-9]*
+part-r-[0-9]*
