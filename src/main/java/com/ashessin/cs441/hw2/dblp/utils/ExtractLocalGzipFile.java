@@ -17,7 +17,7 @@ public final class ExtractLocalGzipFile {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
-        final String CWD = System.getProperty("user.dir") + File.pathSeparator;
+        final String CWD = System.getProperty("user.dir") + File.separator;
         String gzipFilePath = args[0];
 
         if (!gzipFilePath.endsWith(".gz")) throw new AssertionError();
@@ -25,7 +25,7 @@ public final class ExtractLocalGzipFile {
 
         String outputFilePath;
         if (args.length < 2) {
-            outputFilePath = CWD + gzipFile.getName();
+            outputFilePath = CWD + gzipFile.getName().substring(0, gzipFile.getName().length() - 3);
         } else {
             outputFilePath = args[1];
         }
