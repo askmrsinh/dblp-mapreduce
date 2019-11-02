@@ -61,7 +61,7 @@ public final class SingleFieldCount extends Configured implements Tool {
         final String HDFS = "hdfs://localhost:9000";
         Path inputFile = new Path(new URI(HDFS + args[0]));
         Path outputPath = new Path(new URI(HDFS + args[1]));
-        DblpSingleFieldCountMapper.setRequiredField(args[2].toLowerCase());
+        conf.set("requiredField", args[2]);
 
         FileSystem hdfs = FileSystem.get(URI.create(HDFS), conf);
         // delete existing hdfs target directory
@@ -99,12 +99,23 @@ public final class SingleFieldCount extends Configured implements Tool {
         private static String requiredField;
         private Text result = new Text();
 
-        static void setRequiredField(String fieldKey) {
-            requiredField = fieldKey;
+        static void setRequiredField(Mapper.Context context) {
+            requiredField = context.getConfiguration().get("requiredField").toLowerCase().trim();
         }
 
         static boolean getRequiredFieldType(String fieldKey) {
             return !fieldKey.matches("authors|editors|urls|ees|cites|schools");
+        }
+
+        /**
+         * Called once at the beginning of the task.
+         *
+         * @param context
+         */
+        @Override
+        protected void setup(Context context) throws IOException, InterruptedException {
+            super.setup(context);
+            setRequiredField(context);
         }
 
         /**

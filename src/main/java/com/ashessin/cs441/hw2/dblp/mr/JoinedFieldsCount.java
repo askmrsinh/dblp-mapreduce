@@ -67,8 +67,7 @@ public final class JoinedFieldsCount extends Configured implements Tool {
         final String HDFS = "hdfs://localhost:9000";
         Path inputFile = new Path(new URI(HDFS + args[0]));
         Path outputPath = new Path(new URI(HDFS + args[1]));
-
-        DblpJoinedFieldsCountMapper.setRequiredFields(args[2]);
+        conf.set("requiredFields", args[2].toLowerCase());
 
         FileSystem hdfs = FileSystem.get(URI.create(HDFS), conf);
         // delete existing directory
@@ -106,8 +105,8 @@ public final class JoinedFieldsCount extends Configured implements Tool {
         private static String[] requiredFields;
         private Text tag = new Text();
 
-        static void setRequiredFields(String fieldKeys) {
-            requiredFields = fieldKeys.toLowerCase().split(",");
+        static void setRequiredFields(Mapper.Context context) {
+            requiredFields = context.getConfiguration().get("requiredFields").toLowerCase().trim().split(",");
         }
 
         static LinkedHashSet<String> getCompositeField(ArrayList<ArrayList<String>> fields) {
@@ -154,6 +153,17 @@ public final class JoinedFieldsCount extends Configured implements Tool {
                                                 "\t" + s3.toString() : "";
                                     }))).filter(s -> s.length() > 0)
                     .collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+
+        /**
+         * Called once at the beginning of the task.
+         *
+         * @param context
+         */
+        @Override
+        protected void setup(Context context) throws IOException, InterruptedException {
+            super.setup(context);
+            setRequiredFields(context);
         }
 
         /**
