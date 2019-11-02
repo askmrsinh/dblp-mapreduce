@@ -29,7 +29,7 @@ public final class CopyHdfsFileToLocal extends Configured implements Tool {
         Configuration conf = super.getConf();
 
         final String CWD = System.getProperty("user.dir") + File.separator;
-        final String HDFS = "hdfs://localhost:9000";
+        final String HDFS = conf.get("fs.defaultFS");
         String hdfsFilePath = HDFS + args[0];
 
         Path hdfsFile = new Path(new URI(hdfsFilePath));

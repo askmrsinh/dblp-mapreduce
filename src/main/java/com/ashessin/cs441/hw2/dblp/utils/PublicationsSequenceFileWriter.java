@@ -91,7 +91,7 @@ public final class PublicationsSequenceFileWriter extends Configured implements 
         xmlInputFactory.setProperty(WstxInputProperties.P_MAX_ENTITY_COUNT, Integer.MAX_VALUE);
 
         String localFilePath = args[0];
-        final String HDFS = "hdfs://localhost:9000";
+        final String HDFS = conf.get("fs.defaultFS");
         Path outputPath = new Path(new URI(HDFS + args[1]));
 
         FileSystem hdfs = FileSystem.get(URI.create(HDFS), conf);

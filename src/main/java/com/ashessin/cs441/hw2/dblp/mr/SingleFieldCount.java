@@ -58,7 +58,7 @@ public final class SingleFieldCount extends Configured implements Tool {
         conf.set("mapreduce.output.fileoutputformat.compress.type", "BLOCK");
         conf.set("mapreduce.map.output.compress.codec", "org.apache.hadoop.io.compress.DefaultCodec");
 
-        final String HDFS = "hdfs://localhost:9000";
+        final String HDFS = conf.get("fs.defaultFS");
         Path inputFile = new Path(new URI(HDFS + args[0]));
         Path outputPath = new Path(new URI(HDFS + args[1]));
         conf.set("requiredField", args[2]);

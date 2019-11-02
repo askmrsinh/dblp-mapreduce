@@ -42,7 +42,7 @@ public final class PublicationsSequenceFileReader extends Configured implements 
     public int run(String[] args) throws Exception {
         Configuration conf = super.getConf();
 
-        final String HDFS = "hdfs://localhost:9000";
+        final String HDFS = conf.get("fs.defaultFS");
         Path inputFilePath = new Path(new URI(HDFS + args[0]));
 
         try (SequenceFile.Reader reader = new SequenceFile.Reader(conf,
