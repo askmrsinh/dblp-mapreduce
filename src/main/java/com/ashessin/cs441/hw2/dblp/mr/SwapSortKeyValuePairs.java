@@ -56,9 +56,9 @@ public final class SwapSortKeyValuePairs extends Configured implements Tool {
     @Override
     public int run(String[] args) throws Exception {
         Configuration conf = super.getConf();
-        conf.set("mapred.compress.map.output", "true");
-        conf.set("mapred.output.compression.type", "BLOCK");
-        conf.set("mapred.map.output.compression.codec", "org.apache.hadoop.io.compress.DefaultCodec");
+        conf.set("mapreduce.map.output.compress", "true");
+        conf.set("mapreduce.output.fileoutputformat.compress.type", "BLOCK");
+        conf.set("mapreduce.map.output.compress.codec", "org.apache.hadoop.io.compress.DefaultCodec");
 
         final String HDFS = "hdfs://localhost:9000";
         Path inputFile = new Path(new URI(HDFS + args[0]));
