@@ -4,6 +4,9 @@ version := "0.1"
 
 scalaVersion := "2.12.10"
 
+mainClass in(Compile, run) := Some("com.ashessin.cs441.hw2.dblp.Start")
+mainClass in(Compile, packageBin) := Some("com.ashessin.cs441.hw2.dblp.Start")
+
 assemblyMergeStrategy in assembly := {
   case "dblp.xml" => MergeStrategy.discard
   case "main.log" => MergeStrategy.discard
