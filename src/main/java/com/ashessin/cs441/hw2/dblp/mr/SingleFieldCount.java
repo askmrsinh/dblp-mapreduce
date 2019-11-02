@@ -108,6 +108,17 @@ public final class SingleFieldCount extends Configured implements Tool {
         }
 
         /**
+         * Uses Java Reflection to gain access to a method in {@link PublicationWritable} class.
+         *
+         * @param methodName the suffix in a getter method name
+         * @return provides access to a getter method from {@link PublicationWritable}
+         * @throws NoSuchMethodException if the getter method does not exists
+         */
+        Method getMethod(String methodName) throws NoSuchMethodException {
+            return PublicationWritable.class.getMethod(methodName);
+        }
+
+        /**
          * Called once at the beginning of the task.
          *
          * @param context
@@ -149,17 +160,6 @@ public final class SingleFieldCount extends Configured implements Tool {
                 }
             }
 
-        }
-
-        /**
-         * Uses Java Reflection to gain access to a method in {@link PublicationWritable} class.
-         *
-         * @param methodName the suffix in a getter method name
-         * @return provides access to a getter method from {@link PublicationWritable}
-         * @throws NoSuchMethodException if the getter method does not exists
-         */
-        Method getMethod(String methodName) throws NoSuchMethodException {
-            return PublicationWritable.class.getMethod(methodName);
         }
     }
 }

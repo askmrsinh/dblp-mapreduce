@@ -109,7 +109,18 @@ public final class JoinedFieldsCount extends Configured implements Tool {
             requiredFields = context.getConfiguration().get("requiredFields").toLowerCase().trim().split(",");
         }
 
-        static LinkedHashSet<String> getCompositeField(ArrayList<ArrayList<String>> fields) {
+        /**
+         * Uses Java Reflection to return class of method return type in {@link PublicationWritable} class.
+         *
+         * @param methodName the suffix in a getter method name
+         * @return provides class for getter method return type from {@link PublicationWritable}
+         * @throws NoSuchMethodException if the getter method does not exists
+         */
+        Class<?> getMethodType(String methodName) throws NoSuchMethodException {
+            return PublicationWritable.class.getMethod(methodName).getReturnType();
+        }
+
+        static LinkedHashSet<String> retriveCompositeField(ArrayList<ArrayList<String>> fields) {
             if (requiredFields.length == 2) {
                 return getFieldPair(fields);
             }
@@ -196,7 +207,7 @@ public final class JoinedFieldsCount extends Configured implements Tool {
                 }
             }
 
-            LinkedHashSet<String> compositeFields = getCompositeField(listOLists);
+            LinkedHashSet<String> compositeFields = retriveCompositeField(listOLists);
             // System.out.println("FIELDS: " + listOLists);
             // System.out.println("COMPOSITEFIELDS: " + compositeFields);
 
@@ -216,18 +227,6 @@ public final class JoinedFieldsCount extends Configured implements Tool {
          */
         Method getMethod(String methodName) throws NoSuchMethodException {
             return PublicationWritable.class.getMethod(methodName);
-        }
-
-
-        /**
-         * Uses Java Reflection to return class of method return type in {@link PublicationWritable} class.
-         *
-         * @param methodName the suffix in a getter method name
-         * @return provides class for getter method return type from {@link PublicationWritable}
-         * @throws NoSuchMethodException if the getter method does not exists
-         */
-        Class<?> getMethodType(String methodName) throws NoSuchMethodException {
-            return PublicationWritable.class.getMethod(methodName).getReturnType();
         }
     }
 }
