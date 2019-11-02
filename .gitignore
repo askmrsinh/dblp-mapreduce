@@ -258,7 +258,9 @@ project/plugins/project/
 ### Scala ###
 
 # End of https://www.gitignore.io/api/sbt,java,scala,maven,java-web,intellij,code-java,intellij+all,intellij+iml
-/src/main/resources/dblp-test.xml
+/src/main/resources/dblp.xml.gz
 /src/main/resources/dblp.xml
+/src/main/resources/input
+/src/main/resources/output
 *.log.[0-9]*
 part-r-[0-9]*
