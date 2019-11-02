@@ -69,7 +69,7 @@ public final class SingleFieldCount extends Configured implements Tool {
             hdfs.delete(outputPath, true);
         }
 
-        Job job = Job.getInstance(conf, "Dblp Simple Count");
+        Job job = Job.getInstance(conf, "Dblp Single Field Count");
         job.setJarByClass(SingleFieldCount.class);
         job.setInputFormatClass(SequenceFileInputFormat.class);
         job.setMapperClass(DblpSingleFieldCountMapper.class);

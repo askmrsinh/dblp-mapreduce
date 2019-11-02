@@ -65,12 +65,12 @@ public final class SwapSortKeyValuePairs extends Configured implements Tool {
         Path outputPath = new Path(new URI(HDFS + args[1]));
 
         FileSystem hdfs = FileSystem.get(URI.create(HDFS), conf);
-        // delete existing directory
+        // delete existing hdfs target directory
         if (hdfs.exists(outputPath)) {
             hdfs.delete(outputPath, true);
         }
 
-        Job job = Job.getInstance(conf, "Swap Key Value pairs");
+        Job job = Job.getInstance(conf, "Dblp Swap Sort Key Value Pairs");
         job.setJarByClass(SwapSortKeyValuePairs.class);
         job.setInputFormatClass(SequenceFileInputFormat.class);
         job.setMapperClass(DblpkSwapSortKeyValuePairsMapper.class);

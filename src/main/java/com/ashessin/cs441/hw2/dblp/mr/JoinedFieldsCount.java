@@ -70,12 +70,12 @@ public final class JoinedFieldsCount extends Configured implements Tool {
         conf.set("requiredFields", args[2].toLowerCase());
 
         FileSystem hdfs = FileSystem.get(URI.create(HDFS), conf);
-        // delete existing directory
+        // delete existing hdfs target directory
         if (hdfs.exists(outputPath)) {
             hdfs.delete(outputPath, true);
         }
 
-        Job job = Job.getInstance(conf, "Dblp Composite Count");
+        Job job = Job.getInstance(conf, "Dblp Joined Fields Count");
         job.setJarByClass(JoinedFieldsCount.class);
         job.setInputFormatClass(SequenceFileInputFormat.class);
         job.setMapperClass(DblpJoinedFieldsCountMapper.class);

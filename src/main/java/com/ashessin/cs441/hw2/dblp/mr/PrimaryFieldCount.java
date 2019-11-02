@@ -69,7 +69,7 @@ public final class PrimaryFieldCount extends Configured implements Tool {
             hdfs.delete(outputPath, true);
         }
 
-        Job job = Job.getInstance(conf, "Dblp Primary Count");
+        Job job = Job.getInstance(conf, "Dblp Primary Field Count");
         job.setJarByClass(PrimaryFieldCount.class);
         job.setInputFormatClass(SequenceFileInputFormat.class);
         job.setMapperClass(DblpPrimaryFieldCountMapper.class);
