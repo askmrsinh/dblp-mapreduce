@@ -44,7 +44,7 @@ public final class ExtractLocalGzipFile {
         System.out.println("Extract Gzip file, Time taken (ms): "
                 + (end - start));
 
-        System.exit(res);
+        // System.exit(res);
     }
 
     public void unzip(File fileTo) throws IOException {

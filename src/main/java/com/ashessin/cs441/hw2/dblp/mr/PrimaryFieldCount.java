@@ -42,7 +42,7 @@ public final class PrimaryFieldCount extends Configured implements Tool {
         System.out.println("Primary Count MR, Time taken (ms): "
                 + (end - start));
 
-        System.exit(res);
+        // System.exit(res);
     }
 
     /**

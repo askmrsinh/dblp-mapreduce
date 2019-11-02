@@ -42,7 +42,7 @@ public final class PublicationsSequenceFileWriter extends Configured implements 
         System.out.println("Sequence File Writer, Time taken (ms): "
                 + (end - start));
 
-        System.exit(res);
+        // System.exit(res);
     }
 
     static boolean isPubicationRecord(String startElementName) {

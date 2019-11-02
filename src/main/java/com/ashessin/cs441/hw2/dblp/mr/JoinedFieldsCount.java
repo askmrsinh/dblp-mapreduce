@@ -47,7 +47,7 @@ public final class JoinedFieldsCount extends Configured implements Tool {
         System.out.println("Composite Count MR, Time taken (ms): "
                 + (end - start));
 
-        System.exit(res);
+        // System.exit(res);
     }
 
     /**

@@ -43,7 +43,7 @@ public final class SwapSortKeyValuePairs extends Configured implements Tool {
         System.out.println("Swap Key Value MR, Time taken (ms): "
                 + (end - start));
 
-        System.exit(res);
+        // System.exit(res);
     }
 
     /**

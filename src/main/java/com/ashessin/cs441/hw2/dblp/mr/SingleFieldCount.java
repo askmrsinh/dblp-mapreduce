@@ -41,7 +41,7 @@ public final class SingleFieldCount extends Configured implements Tool {
         System.out.println("Simple Count MR, Time taken (ms): "
                 + (end - start));
 
-        System.exit(res);
+        // System.exit(res);
     }
 
     /**
