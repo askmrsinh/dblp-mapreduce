@@ -68,6 +68,70 @@ when missing.
 
 This simplification was done based on the inspection of data through hw2/src/main/resources/bin/inspectdblp.sh
 
+Inspecting /home/ashesh/dblp-2019-10-01.xml for tags.
+Found 4782805 publication elements.
+
+Counting each child of the 'dblp' root element...
+'article': 2115563
+'inproceedings': 2473542
+'proceedings': 42142
+'book': 17792
+'incollection': 59913
+'phdthesis': 73841
+'mastersthesis': 12
+'www': 2368692
+'person': 0
+'data': 0
+
+Counting each grandchild of the 'dblp' root element...
+'author': 16613178
+'editor': 104297
+'title': 7151148
+'booktitle': 2576947
+'pages': 4240700
+'year': 4782819
+'address': 3
+'journal': 2115340
+'volume': 2137824
+'number': 1608299
+'month': 10943
+'url': 4868873
+'ee': 5617166
+'cdrom': 12962
+'cite': 172746
+'publisher': 64563
+'crossref': 2533467
+'isbn': 65813
+'series': 27663
+'school': 76369
+'chapter': 2
+'publnr': 0
+
+Counting identical sibling(s) that are grandchildren of the 'dblp' root element...
+'</author>...<author>': 11006018
+'</editor>...<editor>': 86064
+'</title>...<title>': 0
+'</booktitle>...<booktitle>': 0
+'</pages>...<pages>': 16
+'</year>...<year>': 0
+'</address>...<address>': 0
+'</journal>...<journal>': 0
+'</volume>...<volume>': 0
+'</number>...<number>': 0
+'</month>...<month>': 0
+'</url>...<url>': 121338
+'</ee>...<ee>': 1882196
+'</cdrom>...<cdrom>': 850
+'</cite>...<cite>': 97280
+'</publisher>...<publisher>': 2
+'</crossref>...<crossref>': 2
+'</isbn>...<isbn>': 11794
+'</series>...<series>': 0
+'</school>...<school>': 1388
+'</chapter>...<chapter>': 0
+'</publnr>...<publnr>': 0
+
+
 Once a single bibliographic record (with its child elements) has been processed and made into an object, it is
 serialized to the HDFS as sequence files. Further, block compression is used with default codec to append each new
 object record. This sequence file acts as input for all subsequent Map Reduce jobs.
