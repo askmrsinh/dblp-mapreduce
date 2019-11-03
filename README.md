@@ -1,97 +1,173 @@
-# Homework 2
-### Description: you will gain experience with the map/reduce computational model.
-### Grade: 7% + bonus up to 3% for deploying your map/reduce program at [AWS EMR](https://aws.amazon.com/emr).
-#### You can obtain this Git repo using the command git clone git@bitbucket.org:cs441_fall2019/homework2.git. You cannot push your code into this repo, otherwise, your grade for this homework will be ZERO!
-
-## Preliminaries
-If you have not already done so as part of your first homework, you must create your account at [BitBucket](https://bitbucket.org/), a Git repo management system. It is imperative that you use your UIC email account that has the extension @uic.edu. Once you create an account with your UIC address, BibBucket will assign you an academic status that allows you to create private repos. Bitbucket users with free accounts cannot create private repos, which are essential for submitting your homeworks and the course project. Your instructor created a team for this class named [cs441_Spring2019](https://bitbucket.org/cs441_spring2019/). Please contact your TA [Mr.Mohammed Siddiq](msiddi56@uic.edu) from your **UIC.EDU** account and they will add you to the team repo as developers, since they already have the admin privileges. Please use your emails from the class registration roster to add you to the team and you will receive an invitation from BitBucket to join the team. Since it is still a large class, please use your UIC email address for communications or Piazza and avoid emails from other accounts like funnybunny1992@gmail.com. If you don't receive a response within 12 hours, please contact us via Piazza, it may be a case that your direct emails went to the spam folder.
-
-In case you have not done so, you will install [IntelliJ](https://www.jetbrains.com/student/) with your academic license, the JDK, the Scala runtime and the IntelliJ Scala plugin, the [Simple Build Toolkit (SBT)](https://www.scala-sbt.org/1.x/docs/index.html) and make sure that you can create, compile, and run Java and Scala programs. Please make sure that you can run [Java monitoring tools](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/tooldescr025.html) or you can choose a newer JDK and tools if you want to use a more recent one.
-
-Please set up your account with [AWS Educate](https://aws.amazon.com/education/awseducate/). Using your UIC email address will enable you to receive free credits for running your jobs in the cloud.
-
-You will use logging and configuration management frameworks. You will comment your code extensively and supply logging statements at different logging levels (e.g., TRACE, INFO, ERROR) to record information at some salient points in the executions of your programs. All input and configuration variables must be supplied through configuration files -- hardcoding these values in the source code is prohibited and will be punished by taking a large percentage of points from your total grade! You are expected to use [Logback](https://logback.qos.ch/) and [SLFL4J](https://www.slf4j.org/) for logging and [Typesafe Conguration Library](https://github.com/lightbend/config) for managing configuration files. These and other libraries should be exported into your project using your script [build.sbt](https://www.scala-sbt.org/1.0/docs/Basic-Def-Examples.html). These libraries and frameworks are widely used in the industry, so learning them is the time well spent to improve your resume.
-
-When writing your program code in Scala, you should avoid using **var**s to create global side-effects and while/for loops that iterate over collections using [induction variables](https://en.wikipedia.org/wiki/Induction_variable). Instead, you should learn to use collection methods **map**, **flatMap**, **foreach**, **filter** and many others with lambda functions, which make your code linear and easy to understand. Also, avoid mutable variables at all cost. Points will be deducted for having many **var**s and inductive variable loops without explanation why mutation is needed in your code - you can always do without it.
-
-## Overview
-In this homework, you will create a map/reduce program for parallel processing of the [publically available DBLP dataset](https://dblp.uni-trier.de) that contains entries for various publications at many different venues (e.g., conferences and journals). Raw [XML-based DMBLP dataset](https://dblp.uni-trier.de/xml) is also publically available along with its schema and the documentation.
-
-Each entry in the dataset describes a publication, which contains the list of authors, the title, and the publication venue and a few other attributes. The file is approximately 2.5Gb - not big by today's standards, but large enough for this homework assignment. Each entry is independent from the other one in that it can be processed without synchronizing with processing some other entries.
-
-Consider the following entry in the dataset.
-```xml
-<inproceedings mdate="2017-05-24" key="conf/icst/GrechanikHB13">
-<author>Mark Grechanik</author>
-<author>B. M. Mainul Hossain</author>
-<author>Ugo Buy</author>
-<title>Testing Database-Centric Applications for Causes of Database Deadlocks.</title>
-<pages>174-183</pages>
-<year>2013</year>
-<booktitle>ICST</booktitle>
-<ee>https://doi.org/10.1109/ICST.2013.19</ee>
-<ee>http://doi.ieeecomputersociety.org/10.1109/ICST.2013.19</ee>
-<crossref>conf/icst/2013</crossref>
-<url>db/conf/icst/icst2013.html#GrechanikHB13</url>
-</inproceedings>
 ```
 
-This entry lists a paper at the IEEE International Conference on Software Testing, Verification and Validation (ICST) published in 2013 whose authors are my former Ph.D. student at UIC, now tenured Associate Professor at the University of Dhaka, Prof. Dr. B.M. Mainul Hussain whose advisor Prof.Mark Grechanik is a co-author on this paper. The third co-author is Prof.Ugo Buy, a faculty member at our CS department. The presence of three co-authors in a single publication like this one increments a count variable that represents the number of publications with three co-authors. Your job is to determine the distribution of the number of authors across many different journals and conferences using the information extracted from this dataset. Paritioning this dataset into shards is easy, since it requires to preserve the well-formedness of XML only. Most likely, you will write a simple program to partition the dataset into an approximately equal size shards.
+----------------------
+About the DBLP dataset
+----------------------
 
-As before, this homework script is written using a retroscripting technique, in which the homework outlines are generally and loosely drawn, and the individual students improvise to create the implementation that fits their refined objectives. In doing so, students are expected to stay within the basic requirements of the homework and they are free to experiments. Asking questions is important, so please ask away at Piazza!
+Extracting data from dblp F.A.Q:
+    How can I download the whole dblp dataset?
+        https://dblp.org/faq/1474679.html
+    What do I find in dblp.xml?
+        https://dblp.org/faq/16154937.html
+    How are data annotations used in dblp.xml?
+        https://dblp.org/faq/17334559.html
+    How to parse dblp.xml?
+        https://dblp.org/faq/1474681.html
 
-## Functionality
-Your homework assignment is to create a program using the map/reduce model for parallel processing of the publication dataset. Your goal is to produce various statistics about the numbers of co-authors. One such statistics can be expressed as a histogram where each bin shows the range of the numbers of co-authors (e.g., the first bin is one, second bin is 2-3, third is 4-6, and so on until the max number of co-authors). The other statistics will produce the histogtram stratified by journals, conferences, and years of publications. Next, you will produce the list of top 100 authors in the descending order who publish with most co-authors and the list of 100 authors who publish with least co-authors. 
+The dblp.xml is a simple, plain ASCII XML file, using the named entities as given in the accompanying dblp.dtd file.
+A daily updated (but unversioned) XML dump can be found on the dblp web server:
+    https://dblp.org/xml/
+	    dblp.xml.gz		                   compressed (gzip) version of an XML file which contains all bibliographic records
+        dblp.dtd 		                   the Document Type Definition (DTD) required to validate the XML file
 
-To compute the authorship score you will use the following formula. The total score for a paper is one. Hence, if an author published 15 papers as the single author without any co-authors, then her score will be 15. For a paper with multiple co-authors the score will be computed using a split weight as the following. First, each co-author receives 1/N score where N is the number of co-authors. Then, the score of the last co-author is credited 1/(4*N) leaving it 3*N/4 of the original score. The next co-author to the left is debited 1/(4*N) and the process repeats until the first author is reached. For example, for a single author the score is one. For two authors, the original score is 0.5. Then, for the last author the score is updated 0.5*3/4 = 0.5-0.125 = 0.375 and the first author's score is 0.5+0.125 = 0.625. The process repeats the same way for N co-authors.
+Furthermore, each month, a persistent snapshot release is archived:
+    https://dblp.org/xml/release/
 
-Finally, you will output a spreadsheet where for each author you will compute the max, median, and the average number of authors for publication on which the name of the author appears. Also, you will output a stratified breakdown of these statistics by publication venues in addition to the cumulative statistics across all venues. Your job is to create the mapper and the reducer for this task, explain how they work, and then to implement them and run on the DBLP dataset. The output of your map/reduce is a spreadsheet or an CSV file with the required statistics.
-
-Textbook option 1 students will create and run your software application using [Apache Hadoop](http://hadoop.apache.org/), a framework for distributed processing of large data sets across multiple computers (or even on a single node) using the map/reduce model. If your laptop/workstation is limited in its RAM, you can use [Cloudera QuickStart VM with the minimum req of RAM 4Gb](https://www.cloudera.com/downloads/quickstart_vms/5-12.html). Even though you can install and configure Hadoop on your computers, I recommend that you use a virtual machine (VM) of [Hortonworks Sandbox](http://hortonworks.com/products/sandbox/), a preconfigured Apache Hadoop installation with a comprehensive software stack. To run the VM, you can install vmWare or VirtualBox. As UIC students, you have access to free vmWare licenses, go to http://go.uic.edu/csvmware to obtain your free license. In some cases, I may have to provide your email addresses to a department administrator to enable your free VM academic licenses. Please notify me if you cannot register and gain access to the webstore. Textbook option 2 students should implement this homework using Twitter Finagle.
-
-The steps for obtaining your free academic vmWare licenses are the following:
-- Contact [Mr.Phil Bertran](pbeltr1@uic.edu) and CC to [DrMark](drmark@uic.edu) to obtain access to the vmWare academic program.
-- One approved, go to [Onthehub vmWare](http://go.uic.edu/csvmware).
-- Click on the "sign in" link at the top.
-- Click on "register".
-- Select "An account has been created..." and continue with the registration.
-- Make sure that you use the UIC email with which you are registered with the system.
-
-Only UIC students who are registered for this course are eligible. If you are auditing the course, you need to contact the uic webstore directly. Alternatively, you can use [VirtualBox from Oracle Corp](https://www.virtualbox.org/).
-
-You can complete this homework using Scala and __you will immensely enjoy__ the embedded XML processing facilities that come with Scala. You will use Simple Build Tools (SBT) for building the project and running automated tests. I recommend that you run the downloaded VM locally in vmWare or VirtualBox to develop and test your program before you move it to AWS.
-
-Next, after creating and testing your map/reduce program locally, you will deploy it and run it on the Amazon Elastic MapReduce (EMR) - you can find plenty of [documentation online](http://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-work-with-steps.html). You will produce a short movie that documents all steps of the deployment and execution of your program with your narration and you will upload this movie to [youtube](www.youtube.com) and you will submit a link to your movie as part of your submission in the README.md file. To produce a movie, you may use an academic version of [Camtasia](https://shop.techsmith.com/store/techsm/en_US/cat/categoryID.67158100) or some other cheap/free screen capture technology from the UIC webstore or an application for a movie capture of your choice. The captured web browser content should show your login name in the upper right corner of the AWS application and you should introduce yourself in the beginning of the movie speaking into the camera.
-
-## Baseline Submission
-Your baseline project submission should include your map/reduce implementation, a conceptual explanation in the document or in the comments in the source code of how your mapper and reducer work to solve the problem, and the documentation that describe the build and runtime process, to be considered for grading. Your project submission should include all your source code written in Scala as well as non-code artifacts (e.g., configuration files), your project should be buildable using the SBT, and your documentation must specify how you paritioned the data and what input/outputs are. Simply copying Java programs from examples at the DBLP website and modifying them a bit will result in rejecting your submission.
-
-## Piazza collaboration
-You can post questions and replies, statements, comments, discussion, etc. on Piazza. For this homework, feel free to share your ideas, mistakes, code fragments, commands from scripts, and some of your technical solutions with the rest of the class, and you can ask and advise others using Piazza on where resources and sample programs can be found on the internet, how to resolve dependencies and configuration issues. When posting question and answers on Piazza, please select the appropriate folder, i.e., hw2 to ensure that all discussion threads can be easily located. Active participants and problem solvers will receive bonuses from the big brother :-) who is watching your exchanges on Piazza (i.e., your class instructor). However, *you must not describe your map/reduce design or specific details related how your construct your map/reduce pipeline!*
-
-## Git logistics
-**This is an individual homework.** Separate repositories will be created for each of your homeworks and for the course project. You will find a corresponding entry for this homework at git@bitbucket.org:cs441_spring2019/homework2.git. You will fork this repository and your fork will be private, no one else besides you, the TA and your course instructor will have access to your fork. Please remember to grant a read access to your repository to your TA and your instructor. In future, for the team homeworks and the course project, you should grant the write access to your forkmates, but NOT for this homework. You can commit and push your code as many times as you want. Your code will not be visible and it should not be visible to other students (except for your forkmates for a team project, but not for this homework). When you push the code into the remote repo, your instructor and the TA will see your code in your separate private fork. Making your fork public, pushing your code into the main repo, or inviting other students to join your fork for an individual homework will result in losing your grade. For grading, only the latest push timed before the deadline will be considered. **If you push after the deadline, your grade for the homework will be zero**. For more information about using the Git and Bitbucket specifically, please use this [link as the starting point](https://confluence.atlassian.com/bitbucket/bitbucket-cloud-documentation-home-221448814.html). For those of you who struggle with the Git, I recommend a book by Ryan Hodson on Ry's Git Tutorial. The other book called Pro Git is written by Scott Chacon and Ben Straub and published by Apress and it is [freely available](https://git-scm.com/book/en/v2/). There are multiple videos on youtube that go into details of the Git organization and use.
-
-Please follow this naming convention while submitting your work : "Firstname_Lastname_hw2" without quotes, where you specify your first and last names **exactly as you are registered with the University system**, so that we can easily recognize your submission. I repeat, make sure that you will give both your TA and the course instructor the read access to your *private forked repository*.
-
-## Discussions and submission
-You can post questions and replies, statements, comments, discussion, etc. on Piazza. Remember that you cannot share your code and your solutions privately, but you can ask and advise others using Piazza and StackOverflow or some other developer networks where resources and sample programs can be found on the Internet, how to resolve dependencies and configuration issues. Yet, your implementation should be your own and you cannot share it. Alternatively, you cannot copy and paste someone else's implementation and put your name on it. Your submissions will be checked for plagiarism. **Copying code from your classmates or from some sites on the Internet will result in severe academic penalties up to the termination of your enrollment in the University**. When posting question and answers on Piazza, please select the appropriate folder, i.e., hw1 to ensure that all discussion threads can be easily located.
+More information on the XML structure of the dblp records and several design decisions can be found in the following paper:
+    https://dblp.uni-trier.de/xml/docu/dblpxml.pdf
 
 
-## Submission deadline and logistics
-Sunday, October 27 at 11PM CST via the bitbucket repository. Your submission will include the code for the map/reduce program, your documentation with instructions and detailed explanations on how to assemble and deploy your map/reduce along with the results of its run, the visualization snapshot, and a document that explains these results based on the characteristics and the parameters of your simulations, and what the limitations of your implementation are. Again, do not forget, please make sure that you will give both your TA and your instructor the read access to your private forked repository. Your name should be shown in your README.md file and other documents. Your code should compile and run from the command line using the commands **sbt clean compile test** and **sbt clean compile run**. Also, you project should be IntelliJ friendly, i.e., your graders should be able to import your code into IntelliJ and run from there. Use .gitignore to exlude files that should not be pushed into the repo.
+--------------------
+Some important files
+--------------------
+
+hw2/src/main/resources/bin
+    dtd2xsd.pl                              perl script to convert Document Type Definition (DTD) to XML Schema Definition (XSD)
+    inspectdblp.sh                          bash script to extract count for each bibliographic record and other elements in the XML
+
+hw2/src/main/java/com/ashessin/cs441/hw2/dblp/utils
+    ExtractLocalGzipFile.java               extracts a gzip file
+    PublicationsSequenceFileWriter.java     writes the publication records SequenceFile on HDFS by parsing the XML
+    PublicationsSequenceFileReader.java     reads the publication records SequenceFile from the HDFS
+    PublicationWritable.java                to serialize and deserialize publication record fields
+
+hw2/src/main/java/com/ashessin/cs441/hw2/dblp/mr/
+    SingleFieldCount.java                   counts the number of occurrences of a field value
+    JoinedFieldsCount.java                  counts the number of occurrences of a field value set
+    PrimaryFieldCount.java                  counts the number of occurrences of the primary (ie. fist) field value
+    SwapSortKeyValuePairs.java              swaps key value pairs and then sorts (descending)
 
 
-## Evaluation criteria
-- the maximum grade for this homework is 7% with the bonus up to 3% for doing the AWS EMR part. Points are subtracted from this maximum grade: for example, saying that 2% is lost if some requirement is not completed means that the resulting grade will be 7%-2% => 5%; if the core homework functionality does not work, no bonus points will be given;
-- the code does not work in that it does not produce a correct output or crashes: up to 5% lost;
-- having less than five unit and/or integration tests: up to 4% lost;
-- missing comments and explanations from the program: up to 3% lost;
-- logging is not used in the program: up to 3% lost;
-- hardcoding the input values in the source code instead of using the suggested configuration libraries: up to 4% lost;
-- no instructions in README.md on how to install and run your program: up to 4% lost;
-- no instructions on how to use a visualizer to load the output of your program: up to 2% lost;
-- the documentation exists but it is insufficient to understand how you assembled and deployed all components of the cloud: up to 4% lost;
-- the minimum grade for this homework cannot be less than zero.
+------------------
+Application Design
+------------------
 
-That's it, folks!
+First, the input dblp dataset is parsed using StAX API to process bibliographic child record elements into
+`com.ashessin.cs441.hw2.dblp.utils.PublicationWritable` objects having key, publrecord, publtype fields present.
+Other relevant object fields are empty at this point.
+The bibliographic child record elements may be any of the below:
+	article, inproceedings, proceedings, book, incollection, phdthesis, mastersthesis, www, data.
+
+To fill the remaining object fields, after any of the above are encountered as a `javax.xml.stream.events.StartElement`,
+we process subsequent events to look for its child elements (or grandchild of XML root, dblp). The fields in use are:
+	authors, editors, year, journal, urls, ees, cites, crossref, schools.
+
+For simplicity, we only use `String` or `List<String>` datatype for these fields, with the exception of the field year,
+which is an `int`. The year is set to -1 if it's not present for the bibliographic records, rest all are set to empty
+when missing.
+
+This simplification was done based on the inspection of data through hw2/src/main/resources/bin/inspectdblp.sh
+
+Once a single bibliographic record (with its child elements) has been processed and made into an object, it is
+serialized to the HDFS as sequence files. Further, block compression is used with default codec to append each new
+object record. This sequence file acts as input for all subsequent Map Reduce jobs.
+
+As a sample, if the included hw2/src/main/resources/dblp-tiny.xml file is passed, the objects  are written to HDFS and
+their `toString()`` representation gives:
+....
+3313 2019-11-03 16:14:56,557 -0600 [main] INFO  PublicationsSequenceFileReader - tr/meltdown/s18	key="tr/meltdown/s18", publrecord="article", publtype="informal", authors=[Paul Kocher, Daniel Genkin, Daniel Gruss, Werner Haas, Mike Hamburg, Moritz Lipp, Stefan Mangard, Thomas Prescher 0002, Michael Schwarz 0001, Yuval Yarom]", editors=[], year=2018, journal="meltdownattack.com", urls=[], ees=[https://spectreattack.com/spectre.pdf], cites=[], crossref="", schools=[]
+3314 2019-11-03 16:14:56,558 -0600 [main] INFO  PublicationsSequenceFileReader - tr/meltdown/m18	key="tr/meltdown/m18", publrecord="article", publtype="informal", authors=[Moritz Lipp, Michael Schwarz 0001, Daniel Gruss, Thomas Prescher 0002, Werner Haas, Stefan Mangard, Paul Kocher, Daniel Genkin, Yuval Yarom, Mike Hamburg]", editors=[], year=2018, journal="meltdownattack.com", urls=[], ees=[https://meltdownattack.com/meltdown.pdf], cites=[], crossref="", schools=[]
+3314 2019-11-03 16:14:56,558 -0600 [main] INFO  PublicationsSequenceFileReader - tr/acm/CS2013	key="tr/acm/CS2013", publrecord="book", publtype="", authors=[]", editors=[], year=2013, journal="", urls=[], ees=[https://doi.org/10.1145/2534860], cites=[], crossref="", schools=[]
+3315 2019-11-03 16:14:56,559 -0600 [main] INFO  PublicationsSequenceFileReader - phd/Phipps92	key="phd/Phipps92", publrecord="phdthesis", publtype="", authors=[Geoffrey Phipps]", editors=[], year=1992, journal="", urls=[], ees=[], cites=[], crossref="", schools=[Stanford University, Department of Computer Science]
+3316 2019-11-03 16:14:56,560 -0600 [main] INFO  PublicationsSequenceFileReader - phd/Breuer2000	key="phd/Breuer2000", publrecord="phdthesis", publtype="", authors=[Lothar Breuer]", editors=[], year=2000, journal="", urls=[], ees=[http://ubt.opus.hbz-nrw.de/volltexte/2004/119/], cites=[], crossref="", schools=[Univ. Trier, FB 4, Informatik]
+3316 2019-11-03 16:14:56,560 -0600 [main] INFO  PublicationsSequenceFileReader - phd/Hofmann1999	key="phd/Hofmann1999", publrecord="phdthesis", publtype="", authors=[Jens Hofmann 0001]", editors=[], year=1999, journal="", urls=[], ees=[http://ubt.opus.hbz-nrw.de/volltexte/2004/148/, http://d-nb.info/957663463], cites=[], crossref="", schools=[University of Trier, FB 4 Informatik, Germany]
+3317 2019-11-03 16:14:56,561 -0600 [main] INFO  PublicationsSequenceFileReader - phd/Ordille93	key="phd/Ordille93", publrecord="phdthesis", publtype="", authors=[Joann J. Ordille]", editors=[], year=1993, journal="", urls=[], ees=[], cites=[], crossref="", schools=[Univ. of Wisconsin-Madison]
+3318 2019-11-03 16:14:56,562 -0600 [main] INFO  PublicationsSequenceFileReader - phd/Beferull-Lozano02	key="phd/Beferull-Lozano02", publrecord="phdthesis", publtype="", authors=[Baltasar Beferull-Lozano]", editors=[], year=2002, journal="", urls=[], ees=[http://www.uv.es/%7Ebalbelo/thesis_BBL.pdf], cites=[], crossref="", schools=[University of Southern California]
+3318 2019-11-03 16:14:56,562 -0600 [main] INFO  PublicationsSequenceFileReader - phd/Smolka89	key="phd/Smolka89", publrecord="phdthesis", publtype="", authors=[Gert Smolka]", editors=[], year=1989, journal="", urls=[], ees=[http://d-nb.info/891234179], cites=[], crossref="", schools=[Kaiserslautern University of Technology, Germany]
+3319 2019-11-03 16:14:56,563 -0600 [main] INFO  PublicationsSequenceFileReader - phd/Dobry87	key="phd/Dobry87", publrecord="phdthesis", publtype="", authors=[Tep P. Dobry]", editors=[], year=1987, journal="", urls=[], ees=[], cites=[], crossref="", schools=[University of California at Berkeley]
+3319 2019-11-03 16:14:56,563 -0600 [main] INFO  PublicationsSequenceFileReader - phd/Ghemawat95	key="phd/Ghemawat95", publrecord="phdthesis", publtype="", authors=[Sanjay Ghemawat]", editors=[], year=1995, journal="", urls=[], ees=[http://hdl.handle.net/1721.1/37012], cites=[], crossref="", schools=[MIT Laboratory for Computer Science, Cambridge, MA, USA]
+3320 2019-11-03 16:14:56,564 -0600 [main] INFO  PublicationsSequenceFileReader - phd/Rothkugel2002	key="phd/Rothkugel2002", publrecord="phdthesis", publtype="", authors=[Steffen Rothkugel]", editors=[], year=2002, journal="", urls=[], ees=[http://ubt.opus.hbz-nrw.de/volltexte/2004/210/, http://nbn-resolving.de/urn:nbn:de:hbz:385-2109, http://d-nb.info/971737843], cites=[], crossref="", schools=[Univ. Trier, FB 4, Informatik]
+3320 2019-11-03 16:14:56,564 -0600 [main] INFO  PublicationsSequenceFileReader - phd/sk/Frisch2009	key="phd/sk/Frisch2009", publrecord="phdthesis", publtype="", authors=[Guido Frisch]", editors=[], year=2009, journal="", urls=[], ees=[http://d-nb.info/996716548], cites=[], crossref="", schools=[Bratislava, Univ.]
+...
+
+All Map Reduce jobs extends a simple count program to compute numbers across mutiple fields values and field value sets.
+
+	`SingleFieldCount` computes counts over a single field value across serialized dblp records.
+
+	For example on the field 'year' (ie. Number of publications per year):
+		Text IntWritable
+		2018 78
+		2019 76
+		1999 23
+		....
+
+	For field 'authors' (ie. Number of publications per author):
+		Text                IntWritable
+		Paul Kocher         2
+		Daniel Genkin       2
+
+	`JoinedFieldsCount` computes counts over multiple field set values across serialized dblp records.
+	Order of fields doesn't really matter for our use cases (since we sort later base on count).
+	Also, we can give any combination of  `String`, `List<String>` type.
+	Individual fields are joined using '\t' to make a single Text key value.
+
+	eg. field 'year,publrecord' (ie. histogram of publication record per year):
+	eg. field 'authors,authors' (ie. most prolific author pairs):
+	eg. field 'authors,authors, year' (ie. most prolific author pairs each year):
+	eg. field 'authors,authors, authors' (ie. most prolific author triplets):
+
+	`PrimaryFieldCount` works on the output of `JoinedFieldsCount` to aggregate horixonatlly acosst fied value in a set.
+	This can be used to compute number of co-authors per author etc.
+	The workflow in that case would be:
+		(sequnce_file, 'authors,authors') ->  JoinedFieldsCount -> (Text(author1\tauthor2), IntWritable(Count)) ->
+			PrimaryFieldCount -> number of co-authors per author
+
+Intermediate results are stored in the HDFS as compressed sequence files and the final output can be extracted to the
+local filesystem through  CopyHdfsFileToLocal class, which takes HDFS or the defualt file system path as input.
+
+
+(All project files have Javadoc comments and loggers, please feel free to see them in case of doubt.)
+
+------------------
+Usage Instructions
+------------------
+
+Something to note, absolute paths are almost always preferred. Make sure to use correct file system URI.
+For example, if the file 'hw2/src/main/resources/dblp.xml' is on a ordinary filesystem, within the users home directory,
+use:
+	file://$HOME/hw2/src/main/resources/dblp.xml
+
+Similarly, for file on HDFS,
+	use hdfs://$HOSTNAME:PORT/some-path
+
+For S3 bucket use,
+    s3://bucket-name/some-path
+
+3. Setup hadoop using bootstrap script and start all services
+	git clone "https://github.com/user501254/BD_STTP_2016.git"; cd BD_STTP_2016; chmod +x *.sh; InstallHadoop.sh
+	start-all.sh
+
+1. Clone this repository
+	git clone https://asing80@bitbucket.org/asing80/hw2.git
+
+2. Download and extract dataset
+	wget https://dblp.uni-trier.de/xml/dblp-2019-10-01.xml.gz -O hw2/src/main/resources/dblp.xml.gz
+	gunzip dblp.xml.gz
+
+4. Run jar file on hadoop with the downloaded dataset
+	hadoop jar hw2/target/scala-2.12/hw2-assembly-0.1.jar hw2/src/main/resources/dblp.xml
+
+Output part-r-* files will be saved to the same folder within subdirectories.
+For AWS EMR, please follow these steps:
+	https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-launch-custom-jar-cli.html
+Both input and output S3 bucket locations should be passed to the JAR file and must be accessible.
+
+
+------
+Graphs
+------
+
+The program in its default configuration produces a number of TSV files, which can used for visualization.
+Some samples are available at:
+	https://asing80.people.uic.edu/cs441/hw2/
+```
