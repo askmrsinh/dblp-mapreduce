@@ -18,6 +18,8 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -33,6 +35,8 @@ import static org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat.se
  * Counts all values across multiple fields in DBLP records.
  */
 public final class JoinedFieldsCount extends Configured implements Tool {
+    private static final Logger logger = LoggerFactory.getLogger(JoinedFieldsCount.class);
+
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
@@ -42,10 +46,8 @@ public final class JoinedFieldsCount extends Configured implements Tool {
         long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long end = System.currentTimeMillis();
 
-        System.out.println("Composite Count MR, Memory used (bytes): "
-                + (memend - memstart));
-        System.out.println("Composite Count MR, Time taken (ms): "
-                + (end - start));
+        logger.info("Composite Count MR, Memory used (bytes): {}", memend - memstart);
+        logger.info("Composite Count MR, Time taken (ms): {}", end - start);
 
         // System.exit(res);
     }
@@ -100,6 +102,7 @@ public final class JoinedFieldsCount extends Configured implements Tool {
     }
 
     public static class DblpJoinedFieldsCountMapper extends Mapper<Text, PublicationWritable, Text, IntWritable> {
+        private static final Logger logger = LoggerFactory.getLogger(DblpJoinedFieldsCountMapper.class);
 
         private static final IntWritable ONE = new IntWritable(1);
         private static String[] requiredFields;
@@ -203,7 +206,7 @@ public final class JoinedFieldsCount extends Configured implements Tool {
                     }
                     listOLists.add(i, singleList);
                 } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
+                    logger.error(e.getLocalizedMessage());
                 }
             }
 

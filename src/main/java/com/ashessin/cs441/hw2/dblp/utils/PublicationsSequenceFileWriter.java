@@ -10,6 +10,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.DefaultCodec;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -28,6 +30,8 @@ import java.util.ArrayList;
  * DBLP Publications sequence file writer.
  */
 public final class PublicationsSequenceFileWriter extends Configured implements Tool {
+    private static final Logger logger = LoggerFactory.getLogger(PublicationsSequenceFileWriter.class);
+
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
@@ -37,10 +41,8 @@ public final class PublicationsSequenceFileWriter extends Configured implements 
         long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long end = System.currentTimeMillis();
 
-        System.out.println("Sequence File Writer, Memory used (bytes): "
-                + (memend - memstart));
-        System.out.println("Sequence File Writer, Time taken (ms): "
-                + (end - start));
+        logger.info("Sequence File Writer, Memory used (bytes): {}", memend - memstart);
+        logger.info("Sequence File Writer, Time taken (ms): {}", end - start);
 
         // System.exit(res);
     }
@@ -174,7 +176,7 @@ public final class PublicationsSequenceFileWriter extends Configured implements 
                         if (urls != null && !urls.isEmpty()) {
                             pub.setUrls(urls);
                         }
-                        if (editors != null && !ees.isEmpty()) {
+                        if (ees != null && !ees.isEmpty()) {
                             pub.setEes(ees);
                         }
                         if (cites != null && !cites.isEmpty()) {
@@ -187,12 +189,12 @@ public final class PublicationsSequenceFileWriter extends Configured implements 
                         writer.append(k, pub);
                         counter += 1;
                         // System.out.println(pub.toString());
-                        System.out.print("Publications processed: " + counter + "\r");
+                        logger.info("Publications processed: {}\r", counter);
                     }
                 }
             }
         } catch (FileNotFoundException | XMLStreamException e) {
-            e.printStackTrace();
+            logger.error(e.toString());
         }
 
         return 0;

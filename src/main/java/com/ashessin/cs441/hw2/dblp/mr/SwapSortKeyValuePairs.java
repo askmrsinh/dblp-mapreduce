@@ -18,6 +18,8 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -29,6 +31,8 @@ import static org.apache.hadoop.mapreduce.lib.output.TextOutputFormat.setOutputC
  * Swaps Key/Value pairs and then sorts in descending order by the new Key.
  */
 public final class SwapSortKeyValuePairs extends Configured implements Tool {
+    private static final Logger logger = LoggerFactory.getLogger(PrimaryFieldCount.class);
+
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
@@ -38,10 +42,8 @@ public final class SwapSortKeyValuePairs extends Configured implements Tool {
         long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long end = System.currentTimeMillis();
 
-        System.out.println("Swap Key Value MR, Memory used (bytes): "
-                + (memend - memstart));
-        System.out.println("Swap Key Value MR, Time taken (ms): "
-                + (end - start));
+        logger.info("SwapSortKeyValuePairs, Memory used (bytes): {}", memend - memstart);
+        logger.info("SwapSortKeyValuePairs, Time taken (ms): {}", end - start);
 
         // System.exit(res);
     }

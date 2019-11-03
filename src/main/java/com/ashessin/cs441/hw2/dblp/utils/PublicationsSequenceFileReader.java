@@ -7,6 +7,8 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
@@ -14,6 +16,8 @@ import java.net.URI;
  * DBLP Publications sequence file reader.
  */
 public final class PublicationsSequenceFileReader extends Configured implements Tool {
+    private static final Logger logger = LoggerFactory.getLogger(PublicationsSequenceFileReader.class);
+
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
@@ -23,10 +27,8 @@ public final class PublicationsSequenceFileReader extends Configured implements 
         long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long end = System.currentTimeMillis();
 
-        System.out.println("Sequence File Writer, Memory used (bytes): "
-                + (memend - memstart));
-        System.out.println("Sequence File Writer, Time taken (ms): "
-                + (end - start));
+        logger.info("PublicationsSequenceFileReader, Memory used (bytes): {}", memend - memstart);
+        logger.info("PublicationsSequenceFileReader, Time taken (ms): {}", end - start);
 
         // System.exit(res);
     }
@@ -47,13 +49,13 @@ public final class PublicationsSequenceFileReader extends Configured implements 
 
         try (SequenceFile.Reader reader = new SequenceFile.Reader(conf,
                 SequenceFile.Reader.file(inputFilePath))) {
-            System.out.println("Is block compressed = " + reader.isBlockCompressed());
+            logger.debug("Is block compressed = " + reader.isBlockCompressed());
 
             Text k = new Text();
             PublicationWritable value = new PublicationWritable();
 
             while (reader.next(k, value)) {
-                System.out.println(k + "\t" + value);
+                logger.info("{}\t{}", k, value);
             }
         }
 

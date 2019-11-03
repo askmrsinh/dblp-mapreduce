@@ -1,5 +1,8 @@
 package com.ashessin.cs441.hw2.dblp.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.util.zip.GZIPInputStream;
 
@@ -7,9 +10,11 @@ import java.util.zip.GZIPInputStream;
  * Extracts a Gzip file on local filesystem.
  */
 public final class ExtractLocalGzipFile {
+    private static final Logger logger = LoggerFactory.getLogger(ExtractLocalGzipFile.class);
+
     private InputStream in;
 
-    public ExtractLocalGzipFile(File f) throws IOException {
+    private ExtractLocalGzipFile(File f) throws IOException {
         this.in = new FileInputStream(f);
     }
 
@@ -39,18 +44,16 @@ public final class ExtractLocalGzipFile {
         long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long end = System.currentTimeMillis();
 
-        System.out.println("Extract Gzip file, Memory used (bytes): "
-                + (memend - memstart));
-        System.out.println("Extract Gzip file, Time taken (ms): "
-                + (end - start));
+        logger.info("ExtractLocalGzipFile, Memory used (bytes): {}", memend - memstart);
+        logger.info("ExtractLocalGzipFile, Time taken (ms): {}", end - start);
 
         // System.exit(res);
     }
 
-    public void unzip(File fileTo) throws IOException {
+    private void unzip(File fileTo) throws IOException {
         final long MEGABYTE = 1024L * 1024L;
         long fileSize = in.available();
-        System.out.println("Extracting " + fileSize / MEGABYTE + " MiB compressed file as " + fileTo.getAbsolutePath());
+        logger.info("Extracting {} MiB compressed file as {}", fileSize / MEGABYTE, fileTo.getAbsolutePath());
         try (OutputStream out = new FileOutputStream(fileTo)) {
             // http://java-performance.info/java-io-bufferedinputstream-and-java-util-zip-gzipinputstream/
             in = new GZIPInputStream(in, 8192);
@@ -60,18 +63,18 @@ public final class ExtractLocalGzipFile {
             while ((noRead = in.read(buffer)) != -1) {
                 out.write(buffer, 0, noRead);
                 extractedSize += noRead;
-                System.out.print("Processed " + (extractedSize / MEGABYTE) + " MiB ...\r");
+                logger.debug("Processed {} MiB ...\r", extractedSize / MEGABYTE);
             }
             out.flush();
-            System.out.println("Wrote " + (extractedSize / MEGABYTE) + " MiB to " + fileTo.getAbsolutePath());
+            logger.info("Wrote {} MiB to {}", extractedSize / MEGABYTE, fileTo.getAbsolutePath());
         }
     }
 
-    public int close() {
+    private int close() {
         try {
             in.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getLocalizedMessage());
             return 1;
         }
         return 0;

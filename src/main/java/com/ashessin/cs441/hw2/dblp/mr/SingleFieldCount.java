@@ -16,6 +16,8 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -27,6 +29,8 @@ import java.util.List;
  * Counts all values of a single field in DBLP records.
  */
 public final class SingleFieldCount extends Configured implements Tool {
+    private static final Logger logger = LoggerFactory.getLogger(SingleFieldCount.class);
+
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
@@ -36,10 +40,8 @@ public final class SingleFieldCount extends Configured implements Tool {
         long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long end = System.currentTimeMillis();
 
-        System.out.println("Simple Count MR, Memory used (bytes): "
-                + (memend - memstart));
-        System.out.println("Simple Count MR, Time taken (ms): "
-                + (end - start));
+        logger.info("Simple Count MR, Memory used (bytes): {}", memend - memstart);
+        logger.info("Simple Count MR, Time taken (ms): {}", end - start);
 
         // System.exit(res);
     }
@@ -94,6 +96,7 @@ public final class SingleFieldCount extends Configured implements Tool {
      * Mapper class to generate unit count against each value for a given field of a DBLP record.
      */
     public static class DblpSingleFieldCountMapper extends Mapper<Text, PublicationWritable, Text, IntWritable> {
+        private static final Logger logger = LoggerFactory.getLogger(DblpSingleFieldCountMapper.class);
 
         private static final IntWritable ONE = new IntWritable(1);
         private static String requiredField;
@@ -146,7 +149,7 @@ public final class SingleFieldCount extends Configured implements Tool {
                     result.set(new Text(keyString));
                     context.write(result, ONE);
                 } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
+                    logger.error(e.getLocalizedMessage());
                 }
             } else {
                 try {
@@ -156,7 +159,7 @@ public final class SingleFieldCount extends Configured implements Tool {
                         context.write(result, ONE);
                     }
                 } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
+                    logger.error(e.getLocalizedMessage());
                 }
             }
 

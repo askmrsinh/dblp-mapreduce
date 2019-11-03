@@ -17,6 +17,8 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -28,6 +30,8 @@ import static org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat.se
  * Counts the first field value in a field value set.
  */
 public final class PrimaryFieldCount extends Configured implements Tool {
+    private static final Logger logger = LoggerFactory.getLogger(PrimaryFieldCount.class);
+
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
@@ -37,10 +41,8 @@ public final class PrimaryFieldCount extends Configured implements Tool {
         long memend = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long end = System.currentTimeMillis();
 
-        System.out.println("Primary Count MR, Memory used (bytes): "
-                + (memend - memstart));
-        System.out.println("Primary Count MR, Time taken (ms): "
-                + (end - start));
+        logger.info("PrimaryFieldCount, Memory used (bytes): {}", memend - memstart);
+        logger.info("PrimaryFieldCount, Time taken (ms): {}", end - start);
 
         // System.exit(res);
     }

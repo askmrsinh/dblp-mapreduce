@@ -8,6 +8,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +21,7 @@ import java.net.URI;
  * Copies a file from HDFS to local filesystem.
  */
 public final class CopyHdfsFileToLocal extends Configured implements Tool {
+    private static final Logger logger = LoggerFactory.getLogger(CopyHdfsFileToLocal.class);
 
     public static void main(final String[] args) throws Exception {
         int res = ToolRunner.run(new Configuration(), new CopyHdfsFileToLocal(), args);
@@ -43,12 +46,12 @@ public final class CopyHdfsFileToLocal extends Configured implements Tool {
 
         FileSystem hdfs = FileSystem.get(URI.create(HDFS), conf);
         try (InputStream is = hdfs.open(hdfsFile)) {
-            System.out.println("Copying to " + outputFilePath);
+            logger.info("Copying to {}", outputFilePath);
             OutputStream os = FileUtils.openOutputStream(outputFile);
             IOUtils.copyBytes(is, os, getConf(), true);
             Thread.sleep(5);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getLocalizedMessage());
             return 1;
         }
         return 0;
