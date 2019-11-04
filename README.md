@@ -234,4 +234,12 @@ Graphs
 The program in its default configuration produces a number of TSV files, which can used for visualization.
 Some samples are available at:
 	https://asing80.people.uic.edu/cs441/hw2/
+
+
+-----
+Video
+-----
+Hadoop setup (recorder 2016):   https://youtu.be/gWkbPVNER5k
+EMR deployment: Processing 
+
 ```
