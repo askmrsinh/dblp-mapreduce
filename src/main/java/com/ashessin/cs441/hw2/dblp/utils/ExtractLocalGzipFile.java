@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.zip.GZIPInputStream;
 
+import static org.apache.log4j.PropertyConfigurator.configure;
+
 /**
  * Extracts a Gzip file on local filesystem.
  */
@@ -19,6 +21,7 @@ public final class ExtractLocalGzipFile {
     }
 
     public static void main(String[] args) throws Exception {
+        configure(Thread.currentThread().getContextClassLoader().getResource("log4j.properties"));
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
@@ -63,7 +66,9 @@ public final class ExtractLocalGzipFile {
             while ((noRead = in.read(buffer)) != -1) {
                 out.write(buffer, 0, noRead);
                 extractedSize += noRead;
-                logger.debug("Processed {} MiB ...\r", extractedSize / MEGABYTE);
+                if (logger.isDebugEnabled()) {
+                    logger.info("Processed {} MiB ...\r", extractedSize / MEGABYTE);
+                }
             }
             out.flush();
             logger.info("Wrote {} MiB to {}", extractedSize / MEGABYTE, fileTo.getAbsolutePath());

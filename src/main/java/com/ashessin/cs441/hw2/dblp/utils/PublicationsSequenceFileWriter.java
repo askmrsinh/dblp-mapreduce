@@ -3,6 +3,7 @@ package com.ashessin.cs441.hw2.dblp.utils;
 import com.ctc.wstx.api.WstxInputProperties;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
@@ -21,10 +22,12 @@ import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.URI;
 import java.util.ArrayList;
+
+import static org.apache.hadoop.fs.CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY;
+import static org.apache.log4j.PropertyConfigurator.configure;
 
 /**
  * DBLP Publications sequence file writer.
@@ -33,6 +36,8 @@ public final class PublicationsSequenceFileWriter extends Configured implements 
     private static final Logger logger = LoggerFactory.getLogger(PublicationsSequenceFileWriter.class);
 
     public static void main(String[] args) throws Exception {
+        configure(Thread.currentThread().getContextClassLoader().getResource("log4j.properties"));
+        org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
@@ -92,109 +97,131 @@ public final class PublicationsSequenceFileWriter extends Configured implements 
         // javax.xml.stream.XMLStreamException: Maximum entity expansion count limit (100000) exceeded
         xmlInputFactory.setProperty(WstxInputProperties.P_MAX_ENTITY_COUNT, Integer.MAX_VALUE);
 
-        String localFilePath = args[0];
-        final String HDFS = conf.get("fs.defaultFS");
-        Path outputPath = new Path(new URI(HDFS + args[1]));
+        Path dblpXmlFilePath = new Path(args[0]);
+        Path dblpSequnceFilePath = new Path(args[1]);
 
-        FileSystem hdfs = FileSystem.get(URI.create(HDFS), conf);
+        final FileSystem SOURCE_FS = dblpXmlFilePath.getFileSystem(conf);
+        final FileSystem TARGET_FS = dblpSequnceFilePath.getFileSystem(conf);
+
+        logger.info("Source Filesystem is: {}", SOURCE_FS);
+        logger.info("Target Filesystem is: {}", TARGET_FS);
+
+        if (SOURCE_FS.getUri() == TARGET_FS.getUri()) {
+            conf.set(FS_DEFAULT_NAME_KEY, String.valueOf(TARGET_FS.getUri()));
+            logger.info("Setting default filesystem as: {}", conf.get(FS_DEFAULT_NAME_KEY));
+        } else {
+            logger.warn("The default filesystem is: {}", conf.get(FS_DEFAULT_NAME_KEY));
+        }
+
         // delete existing directory
-        if (hdfs.exists(outputPath)) {
-            hdfs.delete(outputPath, true);
+        if (TARGET_FS.exists(dblpSequnceFilePath)) {
+            TARGET_FS.delete(dblpSequnceFilePath, true);
+        }
+
+        // TODO: Implement custom resolver
+        final File DBLP_DTD_FILE = new File(dblpXmlFilePath.getParent() + File.separator + "dblp.dtd");
+        if (!DBLP_DTD_FILE.exists()) {
+            xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
+            logger.warn("Default DBLP DTD missing, disabling DTD support.");
         }
 
         try (SequenceFile.Writer writer = SequenceFile.createWriter(conf,
-                SequenceFile.Writer.file(outputPath),
+                SequenceFile.Writer.file(dblpSequnceFilePath),
                 SequenceFile.Writer.keyClass(Text.class),
                 SequenceFile.Writer.valueClass(PublicationWritable.class),
                 SequenceFile.Writer.compression(
                         SequenceFile.CompressionType.BLOCK,
                         new DefaultCodec())
         )) {
+            try (FSDataInputStream in = SOURCE_FS.open(dblpXmlFilePath)) {
+                XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(in.getWrappedStream());
 
-            XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(new FileInputStream(localFilePath));
+                while (xmlEventReader.hasNext()) {
+                    XMLEvent xmlEvent = xmlEventReader.nextEvent();
 
-            while (xmlEventReader.hasNext()) {
-                XMLEvent xmlEvent = xmlEventReader.nextEvent();
+                    if (xmlEvent.isStartElement()) {
+                        StartElement startElement = xmlEvent.asStartElement();
+                        String startElementName = startElement.getName().getLocalPart();
+                        if (isPubicationRecord(startElementName)) {
+                            publrecord = startElementName;
+                            authors = new ArrayList<>();
+                            editors = new ArrayList<>();
+                            urls = new ArrayList<>();
+                            ees = new ArrayList<>();
+                            cites = new ArrayList<>();
+                            schools = new ArrayList<>();
+                            //Get the 'key' attribute from publication element
+                            Attribute keyAttr = startElement.getAttributeByName(new QName("key"));
+                            //Get the 'publtype' attribute from publication element
+                            Attribute publtypeAttr = startElement.getAttributeByName(new QName("publtype"));
+                            pub = new PublicationWritable(keyAttr.getValue(), publrecord,
+                                    publtypeAttr != null ? publtypeAttr.getValue() : "",
+                                    authors, editors, year, journal, urls, ees, cites, crossref, schools);
+                        } else if (startElement.getName().getLocalPart().equals("author")) {
+                            xmlEvent = xmlEventReader.nextEvent();
+                            authors.add(xmlEvent.asCharacters().getData());
+                        } else if (startElement.getName().getLocalPart().equals("editor")) {
+                            xmlEvent = xmlEventReader.nextEvent();
+                            editors.add(xmlEvent.asCharacters().getData());
+                        } else if (startElement.getName().getLocalPart().equals("year")) {
+                            xmlEvent = xmlEventReader.nextEvent();
+                            pub.setYear(Integer.parseInt(xmlEvent.asCharacters().getData()));
+                        } else if (startElement.getName().getLocalPart().equals("journal")) {
+                            xmlEvent = xmlEventReader.nextEvent();
+                            pub.setJournal(xmlEvent.asCharacters().getData());
+                        } else if (startElement.getName().getLocalPart().equals("url")) {
+                            xmlEvent = xmlEventReader.nextEvent();
+                            urls.add(xmlEvent.asCharacters().getData());
+                        } else if (startElement.getName().getLocalPart().equals("ee")) {
+                            xmlEvent = xmlEventReader.nextEvent();
+                            ees.add(xmlEvent.asCharacters().getData());
+                        } else if (startElement.getName().getLocalPart().equals("cite")) {
+                            xmlEvent = xmlEventReader.nextEvent();
+                            cites.add(xmlEvent.asCharacters().getData());
+                        } else if (startElement.getName().getLocalPart().equals("crossref")) {
+                            xmlEvent = xmlEventReader.nextEvent();
+                            pub.setCrossref(xmlEvent.asCharacters().getData());
+                        } else if (startElement.getName().getLocalPart().equals("school")) {
+                            xmlEvent = xmlEventReader.nextEvent();
+                            schools.add(xmlEvent.asCharacters().getData());
+                        }
+                    }
 
-                if (xmlEvent.isStartElement()) {
-                    StartElement startElement = xmlEvent.asStartElement();
-                    String startElementName = startElement.getName().getLocalPart();
-                    if (isPubicationRecord(startElementName)) {
-                        publrecord = startElementName;
-                        authors = new ArrayList<>();
-                        editors = new ArrayList<>();
-                        urls = new ArrayList<>();
-                        ees = new ArrayList<>();
-                        cites = new ArrayList<>();
-                        schools = new ArrayList<>();
-                        //Get the 'key' attribute from publication element
-                        Attribute keyAttr = startElement.getAttributeByName(new QName("key"));
-                        //Get the 'publtype' attribute from publication element
-                        Attribute publtypeAttr = startElement.getAttributeByName(new QName("publtype"));
-                        pub = new PublicationWritable(keyAttr.getValue(), publrecord,
-                                publtypeAttr != null ? publtypeAttr.getValue() : "",
-                                authors, editors, year, journal, urls, ees, cites, crossref, schools);
-                    } else if (startElement.getName().getLocalPart().equals("author")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        authors.add(xmlEvent.asCharacters().getData());
-                    } else if (startElement.getName().getLocalPart().equals("editor")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        editors.add(xmlEvent.asCharacters().getData());
-                    } else if (startElement.getName().getLocalPart().equals("year")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        pub.setYear(Integer.parseInt(xmlEvent.asCharacters().getData()));
-                    } else if (startElement.getName().getLocalPart().equals("journal")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        pub.setJournal(xmlEvent.asCharacters().getData());
-                    } else if (startElement.getName().getLocalPart().equals("url")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        urls.add(xmlEvent.asCharacters().getData());
-                    } else if (startElement.getName().getLocalPart().equals("ee")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        ees.add(xmlEvent.asCharacters().getData());
-                    } else if (startElement.getName().getLocalPart().equals("cite")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        cites.add(xmlEvent.asCharacters().getData());
-                    } else if (startElement.getName().getLocalPart().equals("crossref")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        pub.setCrossref(xmlEvent.asCharacters().getData());
-                    } else if (startElement.getName().getLocalPart().equals("school")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        schools.add(xmlEvent.asCharacters().getData());
+                    if (xmlEvent.isEndElement()) {
+                        EndElement endElement = xmlEvent.asEndElement();
+                        if (endElement.getName().getLocalPart().equals(publrecord) && (pub != null)) {
+                            if (authors != null && !authors.isEmpty()) {
+                                pub.setAuthors(authors);
+                            }
+                            if (editors != null && !editors.isEmpty()) {
+                                pub.setEditors(editors);
+                            }
+                            if (urls != null && !urls.isEmpty()) {
+                                pub.setUrls(urls);
+                            }
+                            if (ees != null && !ees.isEmpty()) {
+                                pub.setEes(ees);
+                            }
+                            if (cites != null && !cites.isEmpty()) {
+                                pub.setCites(cites);
+                            }
+                            if (schools != null && !schools.isEmpty()) {
+                                pub.setSchool(schools);
+                            }
+                            k.set(pub.getKey());
+                            writer.append(k, pub);
+                            counter += 1;
+                            if (logger.isDebugEnabled()) {
+                                logger.info(pub.toString());
+                            }
+                            System.out.print(String.format("Publications processed: %s\r", counter));
+                        }
                     }
                 }
-
-                if (xmlEvent.isEndElement()) {
-                    EndElement endElement = xmlEvent.asEndElement();
-                    if (endElement.getName().getLocalPart().equals(publrecord) && (pub != null)) {
-                        if (authors != null && !authors.isEmpty()) {
-                            pub.setAuthors(authors);
-                        }
-                        if (editors != null && !editors.isEmpty()) {
-                            pub.setEditors(editors);
-                        }
-                        if (urls != null && !urls.isEmpty()) {
-                            pub.setUrls(urls);
-                        }
-                        if (ees != null && !ees.isEmpty()) {
-                            pub.setEes(ees);
-                        }
-                        if (cites != null && !cites.isEmpty()) {
-                            pub.setCites(cites);
-                        }
-                        if (schools != null && !schools.isEmpty()) {
-                            pub.setSchool(schools);
-                        }
-                        k.set(pub.getKey());
-                        writer.append(k, pub);
-                        counter += 1;
-                        // System.out.println(pub.toString());
-                        logger.info("Publications processed: {}\r", counter);
-                    }
-                }
+                logger.info("Publications processed: {}", counter);
             }
         } catch (FileNotFoundException | XMLStreamException e) {
-            logger.error(e.toString());
+            logger.error("Exception :: ", e);
         }
 
         return 0;

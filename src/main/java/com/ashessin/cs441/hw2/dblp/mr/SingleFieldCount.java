@@ -6,7 +6,9 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.compress.DefaultCodec;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -22,8 +24,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.util.List;
+
+import static org.apache.hadoop.fs.CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY;
+import static org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.setOutputCompressorClass;
+import static org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat.setOutputCompressionType;
+import static org.apache.log4j.PropertyConfigurator.configure;
 
 /**
  * Counts all values of a single field in DBLP records.
@@ -32,6 +38,7 @@ public final class SingleFieldCount extends Configured implements Tool {
     private static final Logger logger = LoggerFactory.getLogger(SingleFieldCount.class);
 
     public static void main(String[] args) throws Exception {
+        configure(Thread.currentThread().getContextClassLoader().getResource("log4j.properties"));
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
@@ -60,15 +67,25 @@ public final class SingleFieldCount extends Configured implements Tool {
         conf.set("mapreduce.output.fileoutputformat.compress.type", "BLOCK");
         conf.set("mapreduce.map.output.compress.codec", "org.apache.hadoop.io.compress.DefaultCodec");
 
-        final String HDFS = conf.get("fs.defaultFS");
-        Path inputFile = new Path(new URI(HDFS + args[0]));
-        Path outputPath = new Path(new URI(HDFS + args[1]));
-        conf.set("requiredField", args[2]);
+        Path sourceFilePath = new Path(args[0]);
+        Path targetDirectoryPath = new Path(args[1]);
 
-        FileSystem hdfs = FileSystem.get(URI.create(HDFS), conf);
-        // delete existing hdfs target directory
-        if (hdfs.exists(outputPath)) {
-            hdfs.delete(outputPath, true);
+        final FileSystem SOURCE_FS = sourceFilePath.getFileSystem(conf);
+        final FileSystem TARGET_FS = targetDirectoryPath.getFileSystem(conf);
+
+        logger.info("Source Filesystem is: {}", SOURCE_FS);
+        logger.info("Target Filesystem is: {}", TARGET_FS);
+
+        if (SOURCE_FS.getUri() == TARGET_FS.getUri()) {
+            conf.set(FS_DEFAULT_NAME_KEY, String.valueOf(TARGET_FS.getUri()));
+            logger.info("Setting default filesystem as: {}", conf.get(FS_DEFAULT_NAME_KEY));
+        } else {
+            logger.warn("The default filesystem is: {}", conf.get(FS_DEFAULT_NAME_KEY));
+        }
+
+        // delete existing directory
+        if (TARGET_FS.exists(targetDirectoryPath)) {
+            TARGET_FS.delete(targetDirectoryPath, true);
         }
 
         Job job = Job.getInstance(conf, "Dblp Single Field Count");
@@ -83,8 +100,11 @@ public final class SingleFieldCount extends Configured implements Tool {
         job.setOutputValueClass(IntWritable.class);
         job.setOutputFormatClass(SequenceFileOutputFormat.class);
 
-        FileInputFormat.setInputPaths(job, inputFile);
-        FileOutputFormat.setOutputPath(job, outputPath);
+        FileInputFormat.setInputPaths(job, sourceFilePath);
+        FileOutputFormat.setOutputPath(job, targetDirectoryPath);
+
+        setOutputCompressionType(job, SequenceFile.CompressionType.BLOCK);
+        setOutputCompressorClass(job, DefaultCodec.class);
 
         if (job.waitForCompletion(true)) {
             return 0;
@@ -128,6 +148,7 @@ public final class SingleFieldCount extends Configured implements Tool {
          */
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
+            configure(Thread.currentThread().getContextClassLoader().getResource("log4j.properties"));
             super.setup(context);
             setRequiredField(context);
         }
@@ -162,7 +183,6 @@ public final class SingleFieldCount extends Configured implements Tool {
                     logger.error(e.getLocalizedMessage());
                 }
             }
-
         }
     }
 }

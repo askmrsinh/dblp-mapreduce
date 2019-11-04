@@ -2,6 +2,7 @@ package com.ashessin.cs441.hw2.dblp.utils;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
@@ -10,7 +11,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
+import static org.apache.log4j.PropertyConfigurator.configure;
 
 /**
  * DBLP Publications sequence file reader.
@@ -19,6 +20,7 @@ public final class PublicationsSequenceFileReader extends Configured implements 
     private static final Logger logger = LoggerFactory.getLogger(PublicationsSequenceFileReader.class);
 
     public static void main(String[] args) throws Exception {
+        configure(Thread.currentThread().getContextClassLoader().getResource("log4j.properties"));
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
@@ -44,11 +46,18 @@ public final class PublicationsSequenceFileReader extends Configured implements 
     public int run(String[] args) throws Exception {
         Configuration conf = super.getConf();
 
-        final String HDFS = conf.get("fs.defaultFS");
-        Path inputFilePath = new Path(new URI(HDFS + args[0]));
+        Path dblpSequnceFilePath = new Path(args[0]);
+
+        final FileSystem TARGET_FS = dblpSequnceFilePath.getFileSystem(conf);
+
+        logger.info("Target Filesystem is: {}", TARGET_FS);
+
+        if (TARGET_FS.getUri() != new Path(conf.get("fs.defaultFS")).getFileSystem(conf).getUri()) {
+            logger.warn("The default filesystem is: {}", conf.get("fs.defaultFS"));
+        }
 
         try (SequenceFile.Reader reader = new SequenceFile.Reader(conf,
-                SequenceFile.Reader.file(inputFilePath))) {
+                SequenceFile.Reader.file(dblpSequnceFilePath))) {
             logger.debug("Is block compressed = " + reader.isBlockCompressed());
 
             Text k = new Text();

@@ -7,12 +7,11 @@ import javax.annotation.Nullable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * DBLP Publication WritableComparable class.
+ * DBLP Publication WritableComparable class to serialize and deserialize publication records.
  */
 public class PublicationWritable implements WritableComparable<PublicationWritable> {
     private String key;
@@ -32,15 +31,14 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
     PublicationWritable() {
     }
 
-    PublicationWritable(String key, String publrecord, @Nullable String publtype, @Nullable ArrayList<String> authors,
-                        int year, @Nullable String journal) {
+    PublicationWritable(String key, String publrecord, @Nullable String publtype) {
         this.key = key;
         this.publrecord = publrecord;
         this.publtype = publtype;
     }
 
     public PublicationWritable(String key, String publrecord, @Nullable String publtype, @Nullable List<String> authors,
-                               @Nullable List<String> editors, @Nullable int year, @Nullable String journal,
+                               @Nullable List<String> editors, int year, @Nullable String journal,
                                @Nullable List<String> urls, @Nullable List<String> ees, @Nullable List<String> cites,
                                @Nullable String crossref, @Nullable List<String> schools) {
         this.key = key;
