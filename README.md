@@ -1,5 +1,94 @@
 ```
 
+-----
+Usage
+-----
+
+java com.ashessin.cs441.hw2.dblp.Start <option> [absolute_input_path[,absolute_output_path]] [arg1[,arg2,arg3]]
+
+<option>:
+	[-w, PublicationsSequenceFileWriter | 
+	 -r, PublicationsSequenceFileReader | 
+	 -c, CopyHdfsFileToLocal | 
+	 -e, ExtractLocalGzipFile | 
+	     SingleFieldCount | 
+	     JoinedFieldsCount | 
+	     PrimaryFieldCount | 
+	     SwapSortKeyValuePairs
+	 --configFile]
+
+
+[absolute_input_path[,absolute_output_path]]:
+    fully qualifed file and/or directory URI.
+
+    example paths:
+        # unzipped dblp.xml file
+        file:///absolute-path-to-dblp.xml
+        # unzipped dblp.xml file on AWS S3
+        s3://bucket-name/absolute-path-to-dblp.xml
+        # unzipped dblp.xml file on Google Storage
+        gs://bucket-name/absolute-path-to-dblp.xml
+        # compressed sequece file on hdfs
+        hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate
+        # compressed sequece file on AWS S3
+        s3://bucket-name/absolute-path-to-dblp.sequnce.deflate
+        # unzipped dblp.xml file on Google Storage
+        gs://bucket-name/absolute-path-to-dblp.sequnce.deflate
+        # output directory for part-r-* files
+        hdfs://localhost:9000/absolute-path-to-output-directory/
+        s3://bucket-name/absolute-path-to-output-directory/
+        gs://bucket-name/absolute-path-to-output-directory/
+
+
+[arg1[,arg2,arg3]]
+    any combination of:
+        key publrecord publtype authors editors year journal urls ees cites crossref schools
+
+
+For execution through custom config file, please see src/main/resources/reference.conf for fields.
+
+examples:
+
+	java com.ashessin.cs441.hw2.dblp.Start --configFile \
+    	   file:///absolute-path-to-config-file.conf
+
+	java com.ashessin.cs441.hw2.dblp.Start \
+    	-w file:///absolute-path-to-dblp.xml \
+	       hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate
+
+	java com.ashessin.cs441.hw2.dblp.Start \
+	    -r hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate
+
+	java com.ashessin.cs441.hw2.dblp.Start SingleFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-1/ \
+	    authors
+
+	java com.ashessin.cs441.hw2.dblp.Start JoinedFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-2/ \
+	    authors,year
+
+	java com.ashessin.cs441.hw2.dblp.Start JoinedFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-3/ \
+	    authors,authors
+
+	java com.ashessin.cs441.hw2.dblp.Start JoinedFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-4/ \
+	    authors,authors,year
+
+	java com.ashessin.cs441.hw2.dblp.Start PrimaryFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-3/
+	    hdfs://localhost:9000/absolute-path-to-output-directory-5/
+
+	java com.ashessin.cs441.hw2.dblp.Start SwapSortKeyValuePairs \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-5/
+	    hdfs://localhost:9000/absolute-path-to-output-directory/
+
+
+
 ----------------------
 About the DBLP dataset
 ----------------------
@@ -68,68 +157,68 @@ when missing.
 
 This simplification was done based on the inspection of data through hw2/src/main/resources/bin/inspectdblp.sh
 
-Inspecting /home/ashesh/dblp-2019-10-01.xml for tags.
-Found 4782805 publication elements.
-
-Counting each child of the 'dblp' root element...
-'article': 2115563
-'inproceedings': 2473542
-'proceedings': 42142
-'book': 17792
-'incollection': 59913
-'phdthesis': 73841
-'mastersthesis': 12
-'www': 2368692
-'person': 0
-'data': 0
-
-Counting each grandchild of the 'dblp' root element...
-'author': 16613178
-'editor': 104297
-'title': 7151148
-'booktitle': 2576947
-'pages': 4240700
-'year': 4782819
-'address': 3
-'journal': 2115340
-'volume': 2137824
-'number': 1608299
-'month': 10943
-'url': 4868873
-'ee': 5617166
-'cdrom': 12962
-'cite': 172746
-'publisher': 64563
-'crossref': 2533467
-'isbn': 65813
-'series': 27663
-'school': 76369
-'chapter': 2
-'publnr': 0
-
-Counting identical sibling(s) that are grandchildren of the 'dblp' root element...
-'</author>...<author>': 11006018
-'</editor>...<editor>': 86064
-'</title>...<title>': 0
-'</booktitle>...<booktitle>': 0
-'</pages>...<pages>': 16
-'</year>...<year>': 0
-'</address>...<address>': 0
-'</journal>...<journal>': 0
-'</volume>...<volume>': 0
-'</number>...<number>': 0
-'</month>...<month>': 0
-'</url>...<url>': 121338
-'</ee>...<ee>': 1882196
-'</cdrom>...<cdrom>': 850
-'</cite>...<cite>': 97280
-'</publisher>...<publisher>': 2
-'</crossref>...<crossref>': 2
-'</isbn>...<isbn>': 11794
-'</series>...<series>': 0
-'</school>...<school>': 1388
-'</chapter>...<chapter>': 0
-'</publnr>...<publnr>': 0
+    Inspecting /home/ashesh/dblp-2019-10-01.xml for tags.
+    Found 4782805 publication elements.
+    
+    Counting each child of the 'dblp' root element...
+    'article': 2115563
+    'inproceedings': 2473542
+    'proceedings': 42142
+    'book': 17792
+    'incollection': 59913
+    'phdthesis': 73841
+    'mastersthesis': 12
+    'www': 2368692
+    'person': 0
+    'data': 0
+    
+    Counting each grandchild of the 'dblp' root element...
+    'author': 16613178
+    'editor': 104297
+    'title': 7151148
+    'booktitle': 2576947
+    'pages': 4240700
+    'year': 4782819
+    'address': 3
+    'journal': 2115340
+    'volume': 2137824
+    'number': 1608299
+    'month': 10943
+    'url': 4868873
+    'ee': 5617166
+    'cdrom': 12962
+    'cite': 172746
+    'publisher': 64563
+    'crossref': 2533467
+    'isbn': 65813
+    'series': 27663
+    'school': 76369
+    'chapter': 2
+    'publnr': 0
+    
+    Counting identical sibling(s) that are grandchildren of the 'dblp' root element...
+    '</author>...<author>': 11006018
+    '</editor>...<editor>': 86064
+    '</title>...<title>': 0
+    '</booktitle>...<booktitle>': 0
+    '</pages>...<pages>': 16
+    '</year>...<year>': 0
+    '</address>...<address>': 0
+    '</journal>...<journal>': 0
+    '</volume>...<volume>': 0
+    '</number>...<number>': 0
+    '</month>...<month>': 0
+    '</url>...<url>': 121338
+    '</ee>...<ee>': 1882196
+    '</cdrom>...<cdrom>': 850
+    '</cite>...<cite>': 97280
+    '</publisher>...<publisher>': 2
+    '</crossref>...<crossref>': 2
+    '</isbn>...<isbn>': 11794
+    '</series>...<series>': 0
+    '</school>...<school>': 1388
+    '</chapter>...<chapter>': 0
+    '</publnr>...<publnr>': 0
 
 
 Once a single bibliographic record (with its child elements) has been processed and made into an object, it is
@@ -192,9 +281,9 @@ local filesystem through  CopyHdfsFileToLocal class, which takes HDFS or the def
 
 (All project files have Javadoc comments and loggers, please feel free to see them in case of doubt.)
 
-------------------
-Usage Instructions
-------------------
+--------------
+Steps to setup
+--------------
 
 Something to note, absolute paths are almost always preferred. Make sure to use correct file system URI.
 For example, if the file 'hw2/src/main/resources/dblp.xml' is on a ordinary filesystem, within the users home directory,
@@ -207,25 +296,33 @@ Similarly, for file on HDFS,
 For S3 bucket use,
     s3://bucket-name/some-path
 
-3. Setup hadoop using bootstrap script and start all services
+1. Setup hadoop using bootstrap script and start all services
 	git clone "https://github.com/user501254/BD_STTP_2016.git"; cd BD_STTP_2016; chmod +x *.sh; InstallHadoop.sh
 	start-all.sh
 
-1. Clone this repository
+2. Clone this repository
 	git clone https://asing80@bitbucket.org/asing80/hw2.git
 
-2. Download and extract dataset
+3. Download and extract dataset
 	wget https://dblp.uni-trier.de/xml/dblp-2019-10-01.xml.gz -O hw2/src/main/resources/dblp.xml.gz
 	gunzip dblp.xml.gz
 
-4. Run jar file on hadoop with the downloaded dataset
-	hadoop jar hw2/target/scala-2.12/hw2-assembly-0.1.jar hw2/src/main/resources/dblp.xml
+4. Use `sbt assembly` to obtain fat jar 
 
-Output part-r-* files will be saved to the same folder within subdirectories.
+5. Run jar file on hadoop with the downloaded dataset
+	hadoop jar hw2/target/scala-2.12/hw2-assembly-0.1.jar -w hw2/src/main/resources/dblp.xml /path/on/hdfs/or/s3/etc
+
+- Output part-r-* files will be saved to the specifed folder within subdirectories.
+- Since they are tab seprated values, Excel or python packages can be used to visaulize them.
+- Each output has its first column as a number and subsequent columns are text vaues.
+- At certain place if a value is missing, that indicates that the corresponding DBLP record didn't have that field.
+- Also, -1 for year denotes an unknown.
+ 
+
 For AWS EMR, please follow these steps:
 	https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-launch-custom-jar-cli.html
 Both input and output S3 bucket locations should be passed to the JAR file and must be accessible.
-
+Output from sample runs are availabe at the link in next section.
 
 ------
 Graphs
