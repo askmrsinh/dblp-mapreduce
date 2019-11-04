@@ -1,0 +1,82 @@
+java com.ashessin.cs441.hw2.dblp.Start <option> [absolute_input_path[,absolute_output_path]] [arg1[,arg2,arg3]]
+
+<option>:
+	[-w, PublicationsSequenceFileWriter | 
+	 -r, PublicationsSequenceFileReader | 
+	 -c, CopyHdfsFileToLocal | 
+	 -e, ExtractLocalGzipFile | 
+	     SingleFieldCount | 
+	     JoinedFieldsCount | 
+	     PrimaryFieldCount | 
+	     SwapSortKeyValuePairs
+	 --configFile]
+
+
+[absolute_input_path[,absolute_output_path]]:
+    fully qualifed file and/or directory URI.
+
+    example paths:
+        # unzipped dblp.xml file
+        file:///absolute-path-to-dblp.xml
+        # unzipped dblp.xml file on AWS S3
+        s3://bucket-name/absolute-path-to-dblp.xml
+        # unzipped dblp.xml file on Google Storage
+        gs://bucket-name/absolute-path-to-dblp.xml
+        # compressed sequece file on hdfs
+        hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate
+        # compressed sequece file on AWS S3
+        s3://bucket-name/absolute-path-to-dblp.sequnce.deflate
+        # unzipped dblp.xml file on Google Storage
+        gs://bucket-name/absolute-path-to-dblp.sequnce.deflate
+        # output directory for part-r-* files
+        hdfs://localhost:9000/absolute-path-to-output-directory/
+        s3://bucket-name/absolute-path-to-output-directory/
+        gs://bucket-name/absolute-path-to-output-directory/
+
+
+[arg1[,arg2,arg3]]
+    any combination of:
+        key publrecord publtype authors editors year journal urls ees cites crossref schools
+
+
+For execution through custom config file, please see src/main/resources/reference.conf for fields.
+
+examples:
+
+	java com.ashessin.cs441.hw2.dblp.Start --configFile \
+    	   file:///absolute-path-to-config-file.conf
+
+	java com.ashessin.cs441.hw2.dblp.Start \
+    	-w file:///absolute-path-to-dblp.xml \
+	       hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate
+
+	java com.ashessin.cs441.hw2.dblp.Start \
+	    -r hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate
+
+	java com.ashessin.cs441.hw2.dblp.Start SingleFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-1/ \
+	    authors
+
+	java com.ashessin.cs441.hw2.dblp.Start JoinedFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-2/ \
+	    authors,year
+
+	java com.ashessin.cs441.hw2.dblp.Start JoinedFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-3/ \
+	    authors,authors
+
+	java com.ashessin.cs441.hw2.dblp.Start JoinedFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-4/ \
+	    authors,authors,year
+
+	java com.ashessin.cs441.hw2.dblp.Start PrimaryFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-3/
+	    hdfs://localhost:9000/absolute-path-to-output-directory-5/
+
+	java com.ashessin.cs441.hw2.dblp.Start SwapSortKeyValuePairs \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-5/
+	    hdfs://localhost:9000/absolute-path-to-output-directory/
