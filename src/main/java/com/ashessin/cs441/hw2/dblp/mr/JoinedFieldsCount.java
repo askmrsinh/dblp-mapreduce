@@ -92,7 +92,7 @@ public final class JoinedFieldsCount extends Configured implements Tool {
             TARGET_FS.delete(targetDirectoryPath, true);
         }
 
-        if(!SOURCE_FS.exists(sourceFilePath)) throw new FileNotFoundException();
+        if (!SOURCE_FS.exists(sourceFilePath)) throw new FileNotFoundException();
 
         Job job = Job.getInstance(conf, "Dblp Joined Fields Count");
         job.setJarByClass(JoinedFieldsCount.class);

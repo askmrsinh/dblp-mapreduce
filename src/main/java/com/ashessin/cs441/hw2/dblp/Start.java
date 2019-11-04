@@ -67,6 +67,11 @@ public class Start {
 
     private boolean parseCommandLineOptions(String[] args) throws Exception {
 
+        if (args.length < 1) {
+            System.out.println(showHelp());
+            return false;
+        }
+
         if (args[0].trim().equalsIgnoreCase("--configFile")) {
             if (args.length == 2) {
                 File configFile = new File(args[1]);
@@ -121,7 +126,7 @@ public class Start {
             SwapSortKeyValuePairs.main(argsNew);
             return true;
         } else {
-            showHelp();
+            System.out.println(showHelp());
         }
         return false;
 
@@ -134,20 +139,17 @@ public class Start {
         final Config config = ConfigFactory.load(configSource.getPath());
         List<? extends Config> jobs = config.getConfigList("jobs");
         for (Config job : jobs) {
-            List<String> arguments= new ArrayList<>(3);
+            List<String> arguments = new ArrayList<>(3);
             arguments.add(job.getString("class"));
-            for (String arg : job.getStringList("args")) {
-                arguments.add(arg);
-            }
+            arguments.addAll(job.getStringList("args"));
             parseCommandLineOptions(arguments.toArray(new String[0]));
         }
     }
 
-    private void showHelp() throws IOException, URISyntaxException {
-        String helpText = new String(Files.readAllBytes(Paths.get(
+    private String showHelp() throws IOException, URISyntaxException {
+        return(new String(Files.readAllBytes(Paths.get(
                 Thread.currentThread().getContextClassLoader().getResource("help.txt").toURI())))
-                .replaceAll(Start.class.getName(), getApplicationStartCmd());
-        System.out.println(helpText);
+                .replaceAll(Start.class.getName(), getApplicationStartCmd()));
     }
 
     /**
@@ -160,13 +162,12 @@ public class Start {
      */
     private String getApplicationStartCmd() {
         final String fullClassFilePath = getFullClassFilePath();
-        final String jarRegex = ".*\\/(.*\\.jar).*\\/";
-        final String jarFile = regexMatch(jarRegex, fullClassFilePath);
+        final String jarFile = regexMatch(fullClassFilePath);
         return (jarFile.isEmpty()) ? "java " + Start.class.getName() : "hadoop jar " + jarFile;
     }
 
-    private String regexMatch(final String regex, final String text) {
-        final Matcher matcher = Pattern.compile(regex).matcher(text);
+    private String regexMatch(final String text) {
+        final Matcher matcher = Pattern.compile(".*\\/(.*\\.jar).*\\/").matcher(text);
         if (matcher.find()) {
             return matcher.group(1);
         }

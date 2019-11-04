@@ -54,7 +54,7 @@ public final class PublicationsSequenceFileReader extends Configured implements 
 
         logger.info("Source Filesystem is: {}", SOURCE_FS);
 
-        if(!SOURCE_FS.exists(dblpSequnceFilePath)) throw new FileNotFoundException();
+        if (!SOURCE_FS.exists(dblpSequnceFilePath)) throw new FileNotFoundException();
 
         if (SOURCE_FS.getUri() != new Path(conf.get("fs.defaultFS")).getFileSystem(conf).getUri()) {
             logger.warn("The default filesystem is: {}", conf.get("fs.defaultFS"));

@@ -8,7 +8,6 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
-import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -25,8 +24,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static org.apache.hadoop.fs.CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY;
-import static org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.setCompressOutput;
-import static org.apache.hadoop.mapreduce.lib.output.TextOutputFormat.setOutputCompressorClass;
 import static org.apache.log4j.PropertyConfigurator.configure;
 
 /**
@@ -37,7 +34,6 @@ public final class SwapSortKeyValuePairs extends Configured implements Tool {
 
     public static void main(String[] args) throws Exception {
         configure(Thread.currentThread().getContextClassLoader().getResource("log4j.properties"));
-        // org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.DEBUG);
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
@@ -87,7 +83,7 @@ public final class SwapSortKeyValuePairs extends Configured implements Tool {
             TARGET_FS.delete(targetDirectoryPath, true);
         }
 
-        if(!SOURCE_FS.exists(sourceFilePath)) throw new FileNotFoundException();
+        if (!SOURCE_FS.exists(sourceFilePath)) throw new FileNotFoundException();
 
         Job job = Job.getInstance(conf, "Dblp Swap Sort Key Value Pairs");
         job.setJarByClass(SwapSortKeyValuePairs.class);

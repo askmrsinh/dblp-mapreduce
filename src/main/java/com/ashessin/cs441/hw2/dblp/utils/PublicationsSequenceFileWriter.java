@@ -3,11 +3,12 @@ package com.ashessin.cs441.hw2.dblp.utils;
 import com.ctc.wstx.api.WstxInputProperties;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.io.compress.DefaultCodec;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -24,6 +25,8 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import static org.apache.hadoop.fs.CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY;
@@ -37,7 +40,6 @@ public final class PublicationsSequenceFileWriter extends Configured implements 
 
     public static void main(String[] args) throws Exception {
         configure(Thread.currentThread().getContextClassLoader().getResource("log4j.properties"));
-        // org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
@@ -118,13 +120,6 @@ public final class PublicationsSequenceFileWriter extends Configured implements 
             TARGET_FS.delete(dblpSequnceFilePath, true);
         }
 
-        // TODO: Implement custom resolver
-        final File DBLP_DTD_FILE = new File(dblpXmlFilePath.getParent() + File.separator + "dblp.dtd");
-        if (!DBLP_DTD_FILE.exists()) {
-            xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
-            logger.warn("Default DBLP DTD missing, disabling DTD support.");
-        }
-
         try (SequenceFile.Writer writer = SequenceFile.createWriter(conf,
                 SequenceFile.Writer.file(dblpSequnceFilePath),
                 SequenceFile.Writer.keyClass(Text.class),
@@ -133,8 +128,29 @@ public final class PublicationsSequenceFileWriter extends Configured implements 
                         SequenceFile.CompressionType.BLOCK,
                         new DefaultCodec())
         )) {
-            try (FSDataInputStream in = SOURCE_FS.open(dblpXmlFilePath)) {
-                XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(in.getWrappedStream());
+            CompressionCodecFactory compressionCodecFactory = new CompressionCodecFactory(conf);
+            CompressionCodec compressionCodec = compressionCodecFactory.getCodec(dblpXmlFilePath);
+            // allow processing gz file as it is without the need to uncompress manually first
+            try (InputStream is = compressionCodec == null ?
+                    SOURCE_FS.open(dblpXmlFilePath).getWrappedStream() :
+                    compressionCodec.createInputStream(SOURCE_FS.open(dblpXmlFilePath))) {
+                xmlInputFactory.setXMLResolver((publicId, systemId, externalForm, entityName) -> {
+                    logger.info("Source XML publicId: {}, systemId: {}, externalForm: {}, entityName: {}",
+                            publicId, systemId, externalForm, entityName);
+                    Path dtdFilePath = new Path(dblpXmlFilePath.getParent() + File.separator + systemId);
+                    logger.info("Attempting to load DTD from {}", dtdFilePath);
+                    try {
+                        if (SOURCE_FS.exists(dtdFilePath)) {
+                            return SOURCE_FS.open(dtdFilePath).getWrappedStream();
+                        } else {
+                            throw new FileNotFoundException();
+                        }
+                    } catch (IOException e) {
+                        logger.error("Exception::", e);
+                    }
+                    return null;
+                });
+                XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(is);
 
                 while (xmlEventReader.hasNext()) {
                     XMLEvent xmlEvent = xmlEventReader.nextEvent();
@@ -224,6 +240,6 @@ public final class PublicationsSequenceFileWriter extends Configured implements 
             logger.error("Exception :: ", e);
         }
 
-        return 0;
+        return counter;
     }
 }
