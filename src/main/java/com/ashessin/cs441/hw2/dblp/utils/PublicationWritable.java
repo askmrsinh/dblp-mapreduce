@@ -143,11 +143,11 @@ public class PublicationWritable implements WritableComparable<PublicationWritab
         this.crossref = crossref;
     }
 
-    public List<String> getSchool() {
+    public List<String> getSchools() {
         return schools;
     }
 
-    public void setSchool(List<String> schools) {
+    public void setSchools(List<String> schools) {
         this.schools = schools;
     }
 

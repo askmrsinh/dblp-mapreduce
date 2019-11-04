@@ -11,6 +11,8 @@ import org.apache.hadoop.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
+
 import static org.apache.log4j.PropertyConfigurator.configure;
 
 /**
@@ -48,11 +50,13 @@ public final class PublicationsSequenceFileReader extends Configured implements 
 
         Path dblpSequnceFilePath = new Path(args[0]);
 
-        final FileSystem TARGET_FS = dblpSequnceFilePath.getFileSystem(conf);
+        final FileSystem SOURCE_FS = dblpSequnceFilePath.getFileSystem(conf);
 
-        logger.info("Target Filesystem is: {}", TARGET_FS);
+        logger.info("Source Filesystem is: {}", SOURCE_FS);
 
-        if (TARGET_FS.getUri() != new Path(conf.get("fs.defaultFS")).getFileSystem(conf).getUri()) {
+        if(!SOURCE_FS.exists(dblpSequnceFilePath)) throw new FileNotFoundException();
+
+        if (SOURCE_FS.getUri() != new Path(conf.get("fs.defaultFS")).getFileSystem(conf).getUri()) {
             logger.warn("The default filesystem is: {}", conf.get("fs.defaultFS"));
         }
 

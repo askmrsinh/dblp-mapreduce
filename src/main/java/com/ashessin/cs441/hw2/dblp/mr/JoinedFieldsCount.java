@@ -21,6 +21,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -71,6 +72,8 @@ public final class JoinedFieldsCount extends Configured implements Tool {
         Path sourceFilePath = new Path(args[0]);
         Path targetDirectoryPath = new Path(args[1]);
 
+        conf.set("requiredFields", args[2].toLowerCase());
+
         final FileSystem SOURCE_FS = sourceFilePath.getFileSystem(conf);
         final FileSystem TARGET_FS = targetDirectoryPath.getFileSystem(conf);
 
@@ -89,7 +92,7 @@ public final class JoinedFieldsCount extends Configured implements Tool {
             TARGET_FS.delete(targetDirectoryPath, true);
         }
 
-        conf.set("requiredFields", args[2].toLowerCase());
+        if(!SOURCE_FS.exists(sourceFilePath)) throw new FileNotFoundException();
 
         Job job = Job.getInstance(conf, "Dblp Joined Fields Count");
         job.setJarByClass(JoinedFieldsCount.class);

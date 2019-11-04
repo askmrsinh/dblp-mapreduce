@@ -25,5 +25,8 @@ libraryDependencies ++= Seq(
   // https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-hdfs
   "org.apache.hadoop" % "hadoop-hdfs" % "3.2.1",
   // https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-common
-  "org.apache.hadoop" % "hadoop-common" % "3.2.1"
+  "org.apache.hadoop" % "hadoop-common" % "3.2.1",
+
+  // https://mvnrepository.com/artifact/com.typesafe/config
+  "com.typesafe" % "config" % "1.4.0",
 )

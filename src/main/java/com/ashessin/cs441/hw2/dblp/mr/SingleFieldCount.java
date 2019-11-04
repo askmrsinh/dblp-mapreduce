@@ -21,6 +21,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -70,6 +71,8 @@ public final class SingleFieldCount extends Configured implements Tool {
         Path sourceFilePath = new Path(args[0]);
         Path targetDirectoryPath = new Path(args[1]);
 
+        conf.set("requiredField", args[2].toLowerCase());
+
         final FileSystem SOURCE_FS = sourceFilePath.getFileSystem(conf);
         final FileSystem TARGET_FS = targetDirectoryPath.getFileSystem(conf);
 
@@ -87,6 +90,8 @@ public final class SingleFieldCount extends Configured implements Tool {
         if (TARGET_FS.exists(targetDirectoryPath)) {
             TARGET_FS.delete(targetDirectoryPath, true);
         }
+
+        if(!SOURCE_FS.exists(sourceFilePath)) throw new FileNotFoundException();
 
         Job job = Job.getInstance(conf, "Dblp Single Field Count");
         job.setJarByClass(SingleFieldCount.class);

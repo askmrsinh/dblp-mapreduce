@@ -20,6 +20,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static org.apache.hadoop.fs.CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY;
@@ -83,6 +84,8 @@ public final class PrimaryFieldCount extends Configured implements Tool {
         if (TARGET_FS.exists(targetDirectoryPath)) {
             TARGET_FS.delete(targetDirectoryPath, true);
         }
+
+        if(!SOURCE_FS.exists(sourceFilePath)) throw new FileNotFoundException();
 
         Job job = Job.getInstance(conf, "Dblp Primary Field Count");
         job.setJarByClass(PrimaryFieldCount.class);

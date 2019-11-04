@@ -37,7 +37,7 @@ public final class PublicationsSequenceFileWriter extends Configured implements 
 
     public static void main(String[] args) throws Exception {
         configure(Thread.currentThread().getContextClassLoader().getResource("log4j.properties"));
-        org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
+        // org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
@@ -206,7 +206,7 @@ public final class PublicationsSequenceFileWriter extends Configured implements 
                                 pub.setCites(cites);
                             }
                             if (schools != null && !schools.isEmpty()) {
-                                pub.setSchool(schools);
+                                pub.setSchools(schools);
                             }
                             k.set(pub.getKey());
                             writer.append(k, pub);

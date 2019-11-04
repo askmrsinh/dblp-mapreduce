@@ -25,7 +25,7 @@ public final class CopyHdfsFileToLocal extends Configured implements Tool {
 
     public static void main(final String[] args) throws Exception {
         configure(Thread.currentThread().getContextClassLoader().getResource("log4j.properties"));
-        org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.DEBUG);
+        // org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
         int res = ToolRunner.run(new Configuration(), new CopyHdfsFileToLocal(), args);
         // System.exit(res);
     }

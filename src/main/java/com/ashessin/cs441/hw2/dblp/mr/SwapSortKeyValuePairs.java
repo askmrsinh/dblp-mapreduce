@@ -21,6 +21,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static org.apache.hadoop.fs.CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY;
@@ -36,7 +37,7 @@ public final class SwapSortKeyValuePairs extends Configured implements Tool {
 
     public static void main(String[] args) throws Exception {
         configure(Thread.currentThread().getContextClassLoader().getResource("log4j.properties"));
-        org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.DEBUG);
+        // org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.DEBUG);
         long start = System.currentTimeMillis();
         long memstart = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
@@ -86,6 +87,8 @@ public final class SwapSortKeyValuePairs extends Configured implements Tool {
             TARGET_FS.delete(targetDirectoryPath, true);
         }
 
+        if(!SOURCE_FS.exists(sourceFilePath)) throw new FileNotFoundException();
+
         Job job = Job.getInstance(conf, "Dblp Swap Sort Key Value Pairs");
         job.setJarByClass(SwapSortKeyValuePairs.class);
         job.setInputFormatClass(SequenceFileInputFormat.class);
@@ -104,8 +107,9 @@ public final class SwapSortKeyValuePairs extends Configured implements Tool {
         FileInputFormat.setInputPaths(job, sourceFilePath);
         FileOutputFormat.setOutputPath(job, targetDirectoryPath);
 
-        setCompressOutput(job, true);
-        setOutputCompressorClass(job, GzipCodec.class);
+        // disabling for now
+        // setCompressOutput(job, true);
+        // setOutputCompressorClass(job, GzipCodec.class);
 
         if (job.waitForCompletion(true)) {
             return 0;
