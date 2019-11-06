@@ -1,97 +1,26 @@
-```
+```text
+This project is a collection of Map reduce jobs process DBLP dataset to produce stats on various fields.
+Processing can happen over a single field or a set of fields, all defined by the user at runtime.
+All outputs are tab separated values (TSV) an can be used for visualization of output.
+
+Extra care has been taken for seamless processing of data on AWS S3 and GCS.
+Alternatively, https://github.com/user501254/BD_STTP_2016.git can be used for semi-automated 
+local Hadoop setup or for setup on AWS Amazon Elastic Compute Cloud (EC2), Google Compute Engine (GCE).
 
 -----
-Usage
+INDEX
 -----
-
-java com.ashessin.cs441.hw2.dblp.Start <option> [absolute_input_path[,absolute_output_path]] [arg1[,arg2,arg3]]
-
-<option>:
-	[-w, PublicationsSequenceFileWriter | 
-	 -r, PublicationsSequenceFileReader | 
-	 -c, CopyHdfsFileToLocal | 
-	 -e, ExtractLocalGzipFile | 
-	     SingleFieldCount | 
-	     JoinedFieldsCount | 
-	     PrimaryFieldCount | 
-	     SwapSortKeyValuePairs
-	 --configFile]
+1. About the DBLP dataset
+2. Some Important Files
+3. Application Design
+4. Setup Instructions
+5. Usage Details
+6. Visualization and Demo
 
 
-[absolute_input_path[,absolute_output_path]]:
-    fully qualifed file and/or directory URI.
-
-    example paths:
-        # unzipped dblp.xml file
-        file:///absolute-path-to-dblp.xml
-        # unzipped dblp.xml file on AWS S3
-        s3://bucket-name/absolute-path-to-dblp.xml
-        # unzipped dblp.xml file on Google Storage
-        gs://bucket-name/absolute-path-to-dblp.xml
-        # compressed sequece file on hdfs
-        hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate
-        # compressed sequece file on AWS S3
-        s3://bucket-name/absolute-path-to-dblp.sequnce.deflate
-        # unzipped dblp.xml file on Google Storage
-        gs://bucket-name/absolute-path-to-dblp.sequnce.deflate
-        # output directory for part-r-* files
-        hdfs://localhost:9000/absolute-path-to-output-directory/
-        s3://bucket-name/absolute-path-to-output-directory/
-        gs://bucket-name/absolute-path-to-output-directory/
-
-
-[arg1[,arg2,arg3]]
-    any combination of:
-        key publrecord publtype authors editors year journal urls ees cites crossref schools
-
-
-For execution through custom config file, please see src/main/resources/reference.conf for fields.
-
-examples:
-
-	java com.ashessin.cs441.hw2.dblp.Start --configFile \
-    	   file:///absolute-path-to-config-file.conf
-
-	java com.ashessin.cs441.hw2.dblp.Start \
-    	-w file:///absolute-path-to-dblp.xml \
-	       hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate
-
-	java com.ashessin.cs441.hw2.dblp.Start \
-	    -r hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate
-
-	java com.ashessin.cs441.hw2.dblp.Start SingleFieldCount \
-	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
-	    hdfs://localhost:9000/absolute-path-to-output-directory-1/ \
-	    authors
-
-	java com.ashessin.cs441.hw2.dblp.Start JoinedFieldCount \
-	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
-	    hdfs://localhost:9000/absolute-path-to-output-directory-2/ \
-	    authors,year
-
-	java com.ashessin.cs441.hw2.dblp.Start JoinedFieldCount \
-	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
-	    hdfs://localhost:9000/absolute-path-to-output-directory-3/ \
-	    authors,authors
-
-	java com.ashessin.cs441.hw2.dblp.Start JoinedFieldCount \
-	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
-	    hdfs://localhost:9000/absolute-path-to-output-directory-4/ \
-	    authors,authors,year
-
-	java com.ashessin.cs441.hw2.dblp.Start PrimaryFieldCount \
-	    hdfs://localhost:9000/absolute-path-to-output-directory-3/
-	    hdfs://localhost:9000/absolute-path-to-output-directory-5/
-
-	java com.ashessin.cs441.hw2.dblp.Start SwapSortKeyValuePairs \
-	    hdfs://localhost:9000/absolute-path-to-output-directory-5/
-	    hdfs://localhost:9000/absolute-path-to-output-directory/
-
-
-
-----------------------
-About the DBLP dataset
-----------------------
+-------------------------
+1. About the DBLP dataset
+-------------------------
 
 Extracting data from dblp F.A.Q:
     How can I download the whole dblp dataset?
@@ -106,23 +35,23 @@ Extracting data from dblp F.A.Q:
 The dblp.xml is a simple, plain ASCII XML file, using the named entities as given in the accompanying dblp.dtd file.
 A daily updated (but unversioned) XML dump can be found on the dblp web server:
     https://dblp.org/xml/
-	    dblp.xml.gz		                   compressed (gzip) version of an XML file which contains all bibliographic records
+        dblp.xml.gz		                   compressed (gzip) version of an XML file with all bibliographic records
         dblp.dtd 		                   the Document Type Definition (DTD) required to validate the XML file
 
 Furthermore, each month, a persistent snapshot release is archived:
     https://dblp.org/xml/release/
 
-More information on the XML structure of the dblp records and several design decisions can be found in the following paper:
+More information on the XML structure of the dblp records and several design decisions can be found in this paper:
     https://dblp.uni-trier.de/xml/docu/dblpxml.pdf
 
 
---------------------
-Some important files
---------------------
+-----------------------
+2. Some Important Files
+-----------------------
 
 hw2/src/main/resources/bin
-    dtd2xsd.pl                              perl script to convert Document Type Definition (DTD) to XML Schema Definition (XSD)
-    inspectdblp.sh                          bash script to extract count for each bibliographic record and other elements in the XML
+    dtd2xsd.pl                              perl script to convert DTD to XML Schema Definition (XSD)
+    inspectdblp.sh                          bash script to extract counts for bibliographic records
 
 hw2/src/main/java/com/ashessin/cs441/hw2/dblp/utils
     ExtractLocalGzipFile.java               extracts a gzip file
@@ -137,19 +66,22 @@ hw2/src/main/java/com/ashessin/cs441/hw2/dblp/mr/
     SwapSortKeyValuePairs.java              swaps key value pairs and then sorts (descending)
 
 
-------------------
-Application Design
-------------------
+---------------------
+3. Application Design
+---------------------
 
 First, the input dblp dataset is parsed using StAX API to process bibliographic child record elements into
 `com.ashessin.cs441.hw2.dblp.utils.PublicationWritable` objects having key, publrecord, publtype fields present.
 Other relevant object fields are empty at this point.
+
 The bibliographic child record elements may be any of the below:
-	article, inproceedings, proceedings, book, incollection, phdthesis, mastersthesis, www, data.
+	article, inproceedings, proceedings, book, incollection, phdthesis, mastersthesis, www, data
 
 To fill the remaining object fields, after any of the above are encountered as a `javax.xml.stream.events.StartElement`,
-we process subsequent events to look for its child elements (or grandchild of XML root, dblp). The fields in use are:
-	authors, editors, year, journal, urls, ees, cites, crossref, schools.
+we process subsequent events to look for its child elements (or grandchild of XML root, dblp).
+
+The fields in use are:
+	authors, editors, year, journal, urls, ees, cites, crossref, schools
 
 For simplicity, we only use `String` or `List<String>` datatype for these fields, with the exception of the field year,
 which is an `int`. The year is set to -1 if it's not present for the bibliographic records, rest all are set to empty
@@ -241,49 +173,51 @@ their `toString()`` representation gives:
 3319 2019-11-03 16:14:56,563 -0600 [main] INFO  PublicationsSequenceFileReader - phd/Ghemawat95	key="phd/Ghemawat95", publrecord="phdthesis", publtype="", authors=[Sanjay Ghemawat]", editors=[], year=1995, journal="", urls=[], ees=[http://hdl.handle.net/1721.1/37012], cites=[], crossref="", schools=[MIT Laboratory for Computer Science, Cambridge, MA, USA]
 3320 2019-11-03 16:14:56,564 -0600 [main] INFO  PublicationsSequenceFileReader - phd/Rothkugel2002	key="phd/Rothkugel2002", publrecord="phdthesis", publtype="", authors=[Steffen Rothkugel]", editors=[], year=2002, journal="", urls=[], ees=[http://ubt.opus.hbz-nrw.de/volltexte/2004/210/, http://nbn-resolving.de/urn:nbn:de:hbz:385-2109, http://d-nb.info/971737843], cites=[], crossref="", schools=[Univ. Trier, FB 4, Informatik]
 3320 2019-11-03 16:14:56,564 -0600 [main] INFO  PublicationsSequenceFileReader - phd/sk/Frisch2009	key="phd/sk/Frisch2009", publrecord="phdthesis", publtype="", authors=[Guido Frisch]", editors=[], year=2009, journal="", urls=[], ees=[http://d-nb.info/996716548], cites=[], crossref="", schools=[Bratislava, Univ.]
-...
+....
 
 All Map Reduce jobs extends a simple count program to compute numbers across mutiple fields values and field value sets.
 
-	`SingleFieldCount` computes counts over a single field value across serialized dblp records.
-
-	For example on the field 'year' (ie. Number of publications per year):
-		Text IntWritable
-		2018 78
-		2019 76
-		1999 23
-		....
-
-	For field 'authors' (ie. Number of publications per author):
-		Text                IntWritable
-		Paul Kocher         2
-		Daniel Genkin       2
-
-	`JoinedFieldsCount` computes counts over multiple field set values across serialized dblp records.
-	Order of fields doesn't really matter for our use cases (since we sort later base on count).
-	Also, we can give any combination of  `String`, `List<String>` type.
-	Individual fields are joined using '\t' to make a single Text key value.
-
-	eg. field 'year,publrecord' (ie. histogram of publication record per year):
-	eg. field 'authors,authors' (ie. most prolific author pairs):
-	eg. field 'authors,authors, year' (ie. most prolific author pairs each year):
-	eg. field 'authors,authors, authors' (ie. most prolific author triplets):
-
-	`PrimaryFieldCount` works on the output of `JoinedFieldsCount` to aggregate horixonatlly acosst fied value in a set.
-	This can be used to compute number of co-authors per author etc.
-	The workflow in that case would be:
-		(sequnce_file, 'authors,authors') ->  JoinedFieldsCount -> (Text(author1\tauthor2), IntWritable(Count)) ->
-			PrimaryFieldCount -> number of co-authors per author
+    `SingleFieldCount` computes counts over a single field value across serialized dblp records.
+    
+    For example on the field 'year' (ie. Number of publications per year):
+        Text IntWritable
+        2018 78
+        2019 76
+        1999 23
+        ...
+    
+    For field 'authors' (ie. Number of publications per author):
+        Text                IntWritable
+        Paul Kocher         2
+        Daniel Genkin       2
+        ...
+    
+    `JoinedFieldsCount` computes counts over values of a field set (up till 3) across serialized dblp records.
+    The order of fields doesn't really matter for our use cases if we later sort the result based on count.
+    However
+    Also, we can give any combination of  `String`, `List<String>`, `int` (for year) type.
+    A Cartesian Product is caluclated over individual fields and then they are joined using '\t'. 
+    This gives us multiple `Text` type key which conatains all the fields values.
+    
+    eg. fieldset 'year,publrecord'             (ie. histogram of publication record per year):
+    eg. fieldset 'authors,authors'             (ie. most prolific author pairs):
+    eg. fieldset 'authors,authors,year'        (ie. most prolific author pairs each year):
+    eg. fieldset 'authors,authors,authors'     (ie. most prolific author triplets):
+    
+    `PrimaryFieldCount` works on the output of `JoinedFieldsCount` to aggregate horixonatlly acosst fied value in a set.
+    This can be used to compute number of co-authors per author etc.
+    The workflow in that case would be:
+        (sequnce_file, 'authors,authors') ->  JoinedFieldsCount -> (Text(author1\tauthor2), IntWritable(Count)) ->
+            PrimaryFieldCount -> number of co-authors per author
 
 Intermediate results are stored in the HDFS as compressed sequence files and the final output can be extracted to the
 local filesystem through  CopyHdfsFileToLocal class, which takes HDFS or the defualt file system path as input.
-
-
 (All project files have Javadoc comments and loggers, please feel free to see them in case of doubt.)
 
---------------
-Steps to setup
---------------
+
+---------------------
+4. Setup Instructions
+---------------------
 
 Something to note, absolute paths are almost always preferred. Make sure to use correct file system URI.
 For example, if the file 'hw2/src/main/resources/dblp.xml' is on a ordinary filesystem, within the users home directory,
@@ -296,47 +230,121 @@ Similarly, for file on HDFS,
 For S3 bucket use,
     s3://bucket-name/some-path
 
-1. Setup hadoop using bootstrap script and start all services
+3. Setup Hadoop using bootstrap script and start all services
 	git clone "https://github.com/user501254/BD_STTP_2016.git"; cd BD_STTP_2016; chmod +x *.sh; InstallHadoop.sh
 	start-all.sh
 
-2. Clone this repository
+1. Clone this repository
 	git clone https://asing80@bitbucket.org/asing80/hw2.git
 
-3. Download and extract dataset
+2. Download and extract dataset
 	wget https://dblp.uni-trier.de/xml/dblp-2019-10-01.xml.gz -O hw2/src/main/resources/dblp.xml.gz
 	gunzip dblp.xml.gz
 
-4. Use `sbt assembly` to obtain fat jar 
+4. Run jar file on hadoop with the downloaded dataset
+	hadoop jar hw2/target/scala-2.12/hw2-assembly-0.1.jar PublicationsSequenceFileWriter \
+        hw2/src/main/resources/dblp.xml \
+        hw2/src/main/resources/publications.sequnce.deflate
 
-5. Run jar file on hadoop with the downloaded dataset
-	hadoop jar hw2/target/scala-2.12/hw2-assembly-0.1.jar -w hw2/src/main/resources/dblp.xml /path/on/hdfs/or/s3/etc
-
-- Output part-r-* files will be saved to the specifed folder within subdirectories.
-- Since they are tab seprated values, Excel or python packages can be used to visaulize them.
-- Each output has its first column as a number and subsequent columns are text vaues.
-- At certain place if a value is missing, that indicates that the corresponding DBLP record didn't have that field.
-- Also, -1 for year denotes an unknown.
- 
-
+Output part-r-* files will be saved to the same folder within subdirectories.
 For AWS EMR, please follow these steps:
 	https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-launch-custom-jar-cli.html
 Both input and output S3 bucket locations should be passed to the JAR file and must be accessible.
-Output from sample runs are availabe at the link in next section.
 
-------
-Graphs
-------
+
+----------------
+6. Usage Details
+----------------
+
+java com.ashessin.cs441.hw2.dblp.Start <option> [absolute_input_path[,absolute_output_path]] [arg1[,arg2,arg3]]
+
+<option>:
+	[-w, PublicationsSequenceFileWriter | 
+	 -r, PublicationsSequenceFileReader | 
+	 -c, CopyHdfsFileToLocal | 
+	 -e, ExtractLocalGzipFile | 
+	     SingleFieldCount | 
+	     JoinedFieldsCount | 
+	     PrimaryFieldCount | 
+	     SwapSortKeyValuePairs
+	 --configFile]
+
+
+[absolute_input_path[,absolute_output_path]]:
+    fully qualifed file and/or directory URI.
+
+    example paths:
+        # unzipped dblp.xml file
+        file:///absolute-path-to-dblp.xml
+        # unzipped dblp.xml file on AWS S3
+        s3://bucket-name/absolute-path-to-dblp.xml
+        # unzipped dblp.xml file on Google Storage
+        gs://bucket-name/absolute-path-to-dblp.xml
+        # compressed sequece file on hdfs
+        hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate
+        # compressed sequece file on AWS S3
+        s3://bucket-name/absolute-path-to-dblp.sequnce.deflate
+        # unzipped dblp.xml file on Google Storage
+        gs://bucket-name/absolute-path-to-dblp.sequnce.deflate
+        # output directory for part-r-* files
+        hdfs://localhost:9000/absolute-path-to-output-directory/
+        s3://bucket-name/absolute-path-to-output-directory/
+        gs://bucket-name/absolute-path-to-output-directory/
+
+
+[arg1[,arg2,arg3]]
+    any combination of:
+        key publrecord publtype authors editors year journal urls ees cites crossref schools
+
+
+For execution through custom config file, please see src/main/resources/reference.conf for fields.
+
+examples:
+
+	java com.ashessin.cs441.hw2.dblp.Start --configFile \
+    	   file:///absolute-path-to-config-file.conf
+
+	java com.ashessin.cs441.hw2.dblp.Start \
+    	-w file:///absolute-path-to-dblp.xml \
+	       hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate
+
+	java com.ashessin.cs441.hw2.dblp.Start \
+	    -r hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate
+
+	java com.ashessin.cs441.hw2.dblp.Start SingleFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-1/ \
+	    authors
+
+	java com.ashessin.cs441.hw2.dblp.Start JoinedFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-2/ \
+	    authors,year
+
+	java com.ashessin.cs441.hw2.dblp.Start JoinedFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-3/ \
+	    authors,authors
+
+	java com.ashessin.cs441.hw2.dblp.Start JoinedFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-dblp.sequnce.deflate \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-4/ \
+	    authors,authors,year
+
+	java com.ashessin.cs441.hw2.dblp.Start PrimaryFieldCount \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-3/
+	    hdfs://localhost:9000/absolute-path-to-output-directory-5/
+
+	java com.ashessin.cs441.hw2.dblp.Start SwapSortKeyValuePairs \
+	    hdfs://localhost:9000/absolute-path-to-output-directory-5/
+	    hdfs://localhost:9000/absolute-path-to-output-directory/
+
+
+-------------------------
+6. Visualization and Demo
+-------------------------
 
 The program in its default configuration produces a number of TSV files, which can used for visualization.
-Some samples are available at:
-	https://asing80.people.uic.edu/cs441/hw2/
-
-
------
-Video
------
-Hadoop setup (recorder 2016):   https://youtu.be/gWkbPVNER5k
-EMR deployment: Processing 
-
+Some samples along with demo for Amaon EMR and Google Compute Engine deployment are available at:
+	https://asing80.people.uic.edu/cs441/hw2/ 
 ```
