@@ -1,0 +1,8 @@
+Hello Ashish,
+
+Your hw2 is graded.
+
+Well thought and structured implementation. Good amount of statistics generated out of the dataset. You have well written extra scripts to assist your development of the project. You grade for hw2 is full 7% and 2% bonus. you missed the full bonus because the submission was required in scala.
+
+Thank you,
+Mohammed Siddiq
