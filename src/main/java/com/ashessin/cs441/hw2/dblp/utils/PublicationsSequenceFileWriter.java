@@ -229,8 +229,8 @@ public final class PublicationsSequenceFileWriter extends Configured implements 
                             counter += 1;
                             if (logger.isDebugEnabled()) {
                                 logger.info(pub.toString());
+                                System.out.print(String.format("Publications processed: %s\r", counter));
                             }
-                            System.out.print(String.format("Publications processed: %s\r", counter));
                         }
                     }
                 }
