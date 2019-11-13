@@ -44,9 +44,9 @@ public class Start {
         try {
 
             if (!parseCommandLineOptions(args)) {
-                System.exit(0);
-            } else {
                 System.exit(1);
+            } else {
+                System.exit(0);
             }
         } catch (ConfigException.Missing e) {
             logger.error("trying to load the input config file: ", e);
