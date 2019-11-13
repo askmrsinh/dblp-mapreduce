@@ -10,7 +10,7 @@ dblp_xml_filepath=$1
 
 echo -e "\e[34mInspecting $dblp_xml_filepath for tags.\e[0m"
 
-dblp_count=$(grep -o '</article>\|</inproceedings>\|</proceedings>\|</book>\|</incollection>\|</phdthesis>\|</mastersthesis>\|</www>|</data>' "$dblp_xml_filepath" | wc -l)
+dblp_count=$(grep -o '</article>\|</inproceedings>\|</proceedings>\|</book>\|</incollection>\|</phdthesis>\|</mastersthesis>\|</www>\|</person>\|</data>' "$dblp_xml_filepath" | wc -l)
 echo -e "\e[34mFound $dblp_count publication elements."
 echo ""
 

@@ -89,9 +89,9 @@ when missing.
 
 This simplification was done based on the inspection of data through hw2/src/main/resources/bin/inspectdblp.sh
 
-    Inspecting /home/ashesh/dblp-2019-10-01.xml for tags.
-    Found 4782805 publication elements.
-    
+    Inspecting ../dblp-2019-10-01.xml for tags.
+    Found 7151497 publication elements.
+
     Counting each child of the 'dblp' root element...
     'article': 2115563
     'inproceedings': 2473542
@@ -103,7 +103,7 @@ This simplification was done based on the inspection of data through hw2/src/mai
     'www': 2368692
     'person': 0
     'data': 0
-    
+
     Counting each grandchild of the 'dblp' root element...
     'author': 16613178
     'editor': 104297
@@ -127,7 +127,7 @@ This simplification was done based on the inspection of data through hw2/src/mai
     'school': 76369
     'chapter': 2
     'publnr': 0
-    
+
     Counting identical sibling(s) that are grandchildren of the 'dblp' root element...
     '</author>...<author>': 11006018
     '</editor>...<editor>': 86064
