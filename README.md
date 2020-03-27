@@ -1,4 +1,6 @@
-```text
+DBLP MapReduce — Processing dblp dataset using Apache Hadoop
+============================================================
+
 This project is a collection of Map reduce jobs process DBLP dataset to produce stats on various fields.
 Processing can happen over a single field or a set of fields, all defined by the user at runtime.
 All outputs are tab separated values (TSV) an can be used for visualization of output.
@@ -10,33 +12,40 @@ local Hadoop setup or for setup on AWS Amazon Elastic Compute Cloud (EC2), Googl
 -----
 INDEX
 -----
-1. About the DBLP dataset
-2. Some Important Files
-3. Application Design
-4. Setup Instructions
-5. Usage Details
-6. Visualization and Demo
+
+1. [About the DBLP dataset](#1-about-the-dblp-dataset)
+2. [Some Important Files](#2-some-important-files)
+3. [Application Design](#3-application-design)
+4. [Setup Instructions](#4-setup-instructions)
+5. [Usage Details](#5-usage-details)
+6. [Visualization and Demo](#6-visualization-and-demo)
 
 
--------------------------
-1. About the DBLP dataset
--------------------------
+
+1\. About the DBLP dataset
+--------------------------
 
 Extracting data from dblp F.A.Q:
-    How can I download the whole dblp dataset?
-        https://dblp.org/faq/1474679.html
-    What do I find in dblp.xml?
-        https://dblp.org/faq/16154937.html
-    How are data annotations used in dblp.xml?
-        https://dblp.org/faq/17334559.html
-    How to parse dblp.xml?
-        https://dblp.org/faq/1474681.html
+
+Q. How can I download the whole dblp dataset?  
+A:    https://dblp.org/faq/1474679.html  
+
+Q. What do I find in dblp.xml?  
+A:    https://dblp.org/faq/16154937.html
+
+Q. How are data annotations used in dblp.xml?  
+A:    https://dblp.org/faq/17334559.html
+    
+Q. How to parse dblp.xml?  
+A:    https://dblp.org/faq/1474681.html
 
 The dblp.xml is a simple, plain ASCII XML file, using the named entities as given in the accompanying dblp.dtd file.
-A daily updated (but unversioned) XML dump can be found on the dblp web server:
+A daily updated (but unversioned) XML dump can be found on the dblp web server: 
     https://dblp.org/xml/
+```text
         dblp.xml.gz		                   compressed (gzip) version of an XML file with all bibliographic records
         dblp.dtd 		                   the Document Type Definition (DTD) required to validate the XML file
+```
 
 Furthermore, each month, a persistent snapshot release is archived:
     https://dblp.org/xml/release/
@@ -45,10 +54,11 @@ More information on the XML structure of the dblp records and several design dec
     https://dblp.uni-trier.de/xml/docu/dblpxml.pdf
 
 
------------------------
-2. Some Important Files
------------------------
 
+2\. Some Important Files
+------------------------
+
+```text
 hw2/src/main/resources/bin
     dtd2xsd.pl                              perl script to convert DTD to XML Schema Definition (XSD)
     inspectdblp.sh                          bash script to extract counts for bibliographic records
@@ -64,30 +74,33 @@ hw2/src/main/java/com/ashessin/cs441/hw2/dblp/mr/
     JoinedFieldsCount.java                  counts the number of occurrences of a field value set
     PrimaryFieldCount.java                  counts the number of occurrences of the primary (ie. fist) field value
     SwapSortKeyValuePairs.java              swaps key value pairs and then sorts (descending)
+```
 
 
----------------------
-3. Application Design
----------------------
+
+3\. Application Design
+----------------------
 
 First, the input dblp dataset is parsed using StAX API to process bibliographic child record elements into
 `com.ashessin.cs441.hw2.dblp.utils.PublicationWritable` objects having key, publrecord, publtype fields present.
 Other relevant object fields are empty at this point.
 
 The bibliographic child record elements may be any of the below:
-	article, inproceedings, proceedings, book, incollection, phdthesis, mastersthesis, www, data
+
+    article, inproceedings, proceedings, book, incollection, phdthesis, mastersthesis, www, data
 
 To fill the remaining object fields, after any of the above are encountered as a `javax.xml.stream.events.StartElement`,
 we process subsequent events to look for its child elements (or grandchild of XML root, dblp).
 
-The fields in use are:
-	authors, editors, year, journal, urls, ees, cites, crossref, schools
+The fields in use are:  
+
+    authors, editors, year, journal, urls, ees, cites, crossref, schools
 
 For simplicity, we only use `String` or `List<String>` datatype for these fields, with the exception of the field year,
 which is an `int`. The year is set to -1 if it's not present for the bibliographic records, rest all are set to empty
 when missing.
 
-This simplification was done based on the inspection of data through hw2/src/main/resources/bin/inspectdblp.sh
+This simplification was done based on the inspection of data through `hw2/src/main/resources/bin/inspectdblp.sh`
 
     Inspecting ../dblp-2019-10-01.xml for tags.
     Found 7151497 publication elements.
@@ -157,8 +170,9 @@ Once a single bibliographic record (with its child elements) has been processed 
 serialized to the HDFS as sequence files. Further, block compression is used with default codec to append each new
 object record. This sequence file acts as input for all subsequent Map Reduce jobs.
 
-As a sample, if the included hw2/src/main/resources/dblp-tiny.xml file is passed, the objects  are written to HDFS and
-their `toString()`` representation gives:
+As a sample, if the included `hw2/src/main/resources/dblp-tiny.xml` file is passed, the objects  are written to HDFS and
+their `toString()` representation gives:
+```log
 ....
 3313 2019-11-03 16:14:56,557 -0600 [main] INFO  PublicationsSequenceFileReader - tr/meltdown/s18	key="tr/meltdown/s18", publrecord="article", publtype="informal", authors=[Paul Kocher, Daniel Genkin, Daniel Gruss, Werner Haas, Mike Hamburg, Moritz Lipp, Stefan Mangard, Thomas Prescher 0002, Michael Schwarz 0001, Yuval Yarom]", editors=[], year=2018, journal="meltdownattack.com", urls=[], ees=[https://spectreattack.com/spectre.pdf], cites=[], crossref="", schools=[]
 3314 2019-11-03 16:14:56,558 -0600 [main] INFO  PublicationsSequenceFileReader - tr/meltdown/m18	key="tr/meltdown/m18", publrecord="article", publtype="informal", authors=[Moritz Lipp, Michael Schwarz 0001, Daniel Gruss, Thomas Prescher 0002, Werner Haas, Stefan Mangard, Paul Kocher, Daniel Genkin, Yuval Yarom, Mike Hamburg]", editors=[], year=2018, journal="meltdownattack.com", urls=[], ees=[https://meltdownattack.com/meltdown.pdf], cites=[], crossref="", schools=[]
@@ -174,6 +188,7 @@ their `toString()`` representation gives:
 3320 2019-11-03 16:14:56,564 -0600 [main] INFO  PublicationsSequenceFileReader - phd/Rothkugel2002	key="phd/Rothkugel2002", publrecord="phdthesis", publtype="", authors=[Steffen Rothkugel]", editors=[], year=2002, journal="", urls=[], ees=[http://ubt.opus.hbz-nrw.de/volltexte/2004/210/, http://nbn-resolving.de/urn:nbn:de:hbz:385-2109, http://d-nb.info/971737843], cites=[], crossref="", schools=[Univ. Trier, FB 4, Informatik]
 3320 2019-11-03 16:14:56,564 -0600 [main] INFO  PublicationsSequenceFileReader - phd/sk/Frisch2009	key="phd/sk/Frisch2009", publrecord="phdthesis", publtype="", authors=[Guido Frisch]", editors=[], year=2009, journal="", urls=[], ees=[http://d-nb.info/996716548], cites=[], crossref="", schools=[Bratislava, Univ.]
 ....
+```
 
 All Map Reduce jobs extends a simple count program to compute numbers across mutiple fields values and field value sets.
 
@@ -215,36 +230,37 @@ local filesystem through  CopyHdfsFileToLocal class, which takes HDFS or the def
 (All project files have Javadoc comments and loggers, please feel free to see them in case of doubt.)
 
 
----------------------
-4. Setup Instructions
----------------------
+
+4\. Setup Instructions
+----------------------
 
 Something to note, absolute paths are almost always preferred. Make sure to use correct file system URI.
 For example, if the file 'hw2/src/main/resources/dblp.xml' is on a ordinary filesystem, within the users home directory,
-use:
-	file://$HOME/hw2/src/main/resources/dblp.xml
+use: `file://$HOME/hw2/src/main/resources/dblp.xml`
 
-Similarly, for file on HDFS,
-	use hdfs://$HOSTNAME:PORT/some-path
+Similarly, for file on HDFS use, `hdfs://$HOSTNAME:PORT/some-path`
 
-For S3 bucket use,
-    s3://bucket-name/some-path
+For S3 bucket use, `s3://bucket-name/some-path`
 
 3. Setup Hadoop using bootstrap script and start all services
-	git clone "https://github.com/user501254/BD_STTP_2016.git"; cd BD_STTP_2016; chmod +x *.sh; InstallHadoop.sh
-	start-all.sh
+
+        git clone "https://github.com/user501254/BD_STTP_2016.git"; cd BD_STTP_2016; chmod +x *.sh; InstallHadoop.sh
+        start-all.sh
 
 1. Clone this repository
-	git clone https://asing80@bitbucket.org/asing80/hw2.git
+
+        git clone https://asing80@bitbucket.org/asing80/hw2.git
 
 2. Download and extract dataset
-	wget https://dblp.uni-trier.de/xml/dblp-2019-10-01.xml.gz -O hw2/src/main/resources/dblp.xml.gz
-	gunzip dblp.xml.gz
+
+        wget https://dblp.uni-trier.de/xml/dblp-2019-10-01.xml.gz -O hw2/src/main/resources/dblp.xml.gz
+        gunzip dblp.xml.gz
 
 4. Run jar file on hadoop with the downloaded dataset
-	hadoop jar hw2/target/scala-2.12/hw2-assembly-0.1.jar PublicationsSequenceFileWriter \
-        hw2/src/main/resources/dblp.xml \
-        hw2/src/main/resources/publications.sequnce.deflate
+
+        hadoop jar hw2/target/scala-2.12/hw2-assembly-0.1.jar PublicationsSequenceFileWriter \
+            hw2/src/main/resources/dblp.xml \
+            hw2/src/main/resources/publications.sequnce.deflate
 
 Output part-r-* files will be saved to the same folder within subdirectories.
 For AWS EMR, please follow these steps:
@@ -252,10 +268,11 @@ For AWS EMR, please follow these steps:
 Both input and output S3 bucket locations should be passed to the JAR file and must be accessible.
 
 
-----------------
-6. Usage Details
-----------------
 
+5\. Usage Details
+-----------------
+
+```text
 java com.ashessin.cs441.hw2.dblp.Start <option> [absolute_input_path[,absolute_output_path]] [arg1[,arg2,arg3]]
 
 <option>:
@@ -338,13 +355,13 @@ examples:
 	java com.ashessin.cs441.hw2.dblp.Start SwapSortKeyValuePairs \
 	    hdfs://localhost:9000/absolute-path-to-output-directory-5/
 	    hdfs://localhost:9000/absolute-path-to-output-directory/
+```
 
 
--------------------------
-6. Visualization and Demo
+
+6\. Visualization and Demo
 -------------------------
 
 The program in its default configuration produces a number of TSV files, which can used for visualization.
-Some samples along with demo for Amaon EMR and Google Compute Engine deployment are available at:
+Some samples along with demo for Amaon EMR and Google Compute Engine deployment are available at:  
 	https://asing80.people.uic.edu/cs441/hw2/ 
-```
